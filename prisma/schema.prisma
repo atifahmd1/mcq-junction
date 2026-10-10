@@ -1,0 +1,39 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Temporary verification model for Module 2 only.
+// Not a product User/Question/Exam table.
+model DatabaseTest {
+  id        Int      @id @default(autoincrement())
+  note      String
+  createdAt DateTime @default(now()) @db.Timestamptz(6) @map("created_at")
+
+  @@map("database_test")
+}
+
+enum Role {
+  STUDENT
+  CONTRIBUTOR
+  REVIEWER
+  ADMIN
+}
+
+// Application User entity synced from Supabase Auth identity on signup/login.
+model User {
+  id        String   @id @db.Uuid // Mirrors Supabase Auth auth.users.id (native UUID)
+  email     String   @unique
+  name      String?
+  avatarUrl String?  @map("avatar_url")
+  role      Role     @default(STUDENT)
+  createdAt DateTime @default(now()) @db.Timestamptz(6) @map("created_at")
+  updatedAt DateTime @updatedAt @db.Timestamptz(6) @map("updated_at")
+
+  @@map("users")
+}
+
