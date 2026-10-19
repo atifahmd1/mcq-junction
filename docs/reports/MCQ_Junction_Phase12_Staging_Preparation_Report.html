@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MCQ Junction — Phase 12: Controlled Staging Deployment Preparation Report</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      mermaid.initialize({ startOnLoad: true, theme: "dark" });
+    });
+  </script>
+  <style>
+    :root {
+      --bg: #09090b;
+      --card-bg: #18181b;
+      --border: #27272a;
+      --text: #f4f4f5;
+      --text-muted: #a1a1aa;
+      --indigo: #6366f1;
+      --indigo-bg: rgba(99, 102, 241, 0.12);
+      --purple: #a855f7;
+      --purple-bg: rgba(168, 85, 247, 0.12);
+      --emerald: #10b981;
+      --emerald-bg: rgba(16, 185, 129, 0.12);
+      --amber: #f59e0b;
+      --amber-bg: rgba(245, 158, 11, 0.12);
+      --red: #ef4444;
+      --red-bg: rgba(239, 68, 68, 0.12);
+      --blue: #3b82f6;
+      --blue-bg: rgba(59, 130, 246, 0.12);
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      margin: 0;
+      padding: 2.5rem 1.5rem;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    header {
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 2rem;
+      margin-bottom: 2.5rem;
+    }
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .badge-pass {
+      background: var(--emerald-bg);
+      color: var(--emerald);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .badge-amber {
+      background: var(--amber-bg);
+      color: var(--amber);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+    .badge-indigo {
+      background: var(--indigo-bg);
+      color: var(--indigo);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+    }
+    .badge-purple {
+      background: var(--purple-bg);
+      color: var(--purple);
+      border: 1px solid rgba(168, 85, 247, 0.3);
+    }
+    h1 {
+      font-size: 2.25rem;
+      font-weight: 800;
+      margin: 1rem 0 0.5rem 0;
+      letter-spacing: -0.025em;
+    }
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      margin-bottom: 1.5rem;
+    }
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+    .meta-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1rem 1.25rem;
+    }
+    .meta-card .label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 0.25rem;
+    }
+    .meta-card .val {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .section {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 1rem;
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+    h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-top: 0;
+      margin-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.75rem;
+      color: #fff;
+    }
+    h3 {
+      font-size: 1.15rem;
+      font-weight: 600;
+      margin-top: 1.5rem;
+      margin-bottom: 0.5rem;
+      color: #e4e4e7;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.25rem 0;
+      font-size: 0.9rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.75rem 1rem;
+      text-align: left;
+    }
+    th {
+      background: rgba(255, 255, 255, 0.03);
+      font-weight: 600;
+      color: var(--text);
+    }
+    tr:hover {
+      background: rgba(255, 255, 255, 0.015);
+    }
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.85em;
+      background: rgba(255, 255, 255, 0.06);
+      padding: 0.2em 0.4em;
+      border-radius: 0.25rem;
+    }
+    pre {
+      background: #121214;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      overflow-x: auto;
+      font-size: 0.85rem;
+    }
+    .callout {
+      border-left: 4px solid var(--amber);
+      background: var(--amber-bg);
+      padding: 1rem 1.25rem;
+      border-radius: 0 0.5rem 0.5rem 0;
+      margin: 1.25rem 0;
+    }
+    .callout-info {
+      border-left-color: var(--indigo);
+      background: var(--indigo-bg);
+    }
+    .callout-success {
+      border-left-color: var(--emerald);
+      background: var(--emerald-bg);
+    }
+    .mermaid {
+      background: #121214;
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div style="display: flex; gap: 0.5rem; align-items: center;">
+        <span class="badge badge-amber">Phase 12 Staging Assurance</span>
+        <span class="badge badge-pass">PASS WITH DOCUMENTED LIMITATIONS</span>
+      </div>
+      <h1>MCQ Junction — Phase 12 Staging Preparation Report</h1>
+      <div class="subtitle">Operational Hardening, Autonomous Sweep Architecture & Controlled Staging Gate Assurance</div>
+      <div class="meta-grid">
+        <div class="meta-card">
+          <div class="label">Total Automated Tests</div>
+          <div class="val" style="color: var(--emerald);">201 / 201 (100% Green)</div>
+        </div>
+        <div class="meta-card">
+          <div class="label">PostgreSQL Integration Specs</div>
+          <div class="val">63 Passing (7 Scheduler)</div>
+        </div>
+        <div class="meta-card">
+          <div class="label">Candidate Lifecycle Browser E2E</div>
+          <div class="val">14 Passing (Playwright)</div>
+        </div>
+        <div class="meta-card">
+          <div class="label">TypeScript & Linter Status</div>
+          <div class="val">0 Errors / 0 Warnings</div>
+        </div>
+        <div class="meta-card">
+          <div class="label">Turbopack Production Build</div>
+          <div class="val" style="color: var(--emerald);">23 Routes Compiled</div>
+        </div>
+        <div class="meta-card">
+          <div class="label">Remote Database Mutations</div>
+          <div class="val" style="color: var(--amber);">Strictly 0 (Untouched)</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Section 1: Executive Summary -->
+    <div class="section">
+      <h2>1. Executive Summary & Verdict</h2>
+      <p>
+        Phase 12 formalizes staging readiness by closing all remaining operational uncertainties identified in Phase 11. Specifically, this phase establishes an authenticated background finalization endpoint for cloud schedulers, restricts unprivileged candidate sessions from triggering broad maintenance sweeps, preserves explicit environment variables in Prisma CLI to prevent accidental remote connects, and adapts route segments to Next.js 16's <code>cacheComponents</code> Turbopack architecture.
+      </p>
+      <div class="callout callout-success">
+        <strong>Milestone Verdict: PASS WITH DOCUMENTED LIMITATIONS</strong><br>
+        All 201 automated specifications (124 unit/domain, 63 PostgreSQL integration, 14 Playwright browser E2E) passed 100% green on local isolated infrastructure. Remote staging database execution is stopped at the human authorization gate.
+      </div>
+    </div>
+
+    <!-- Section 2: Autonomous Background Finalization Architecture -->
+    <div class="section">
+      <h2>2. Autonomous Background Finalization Architecture</h2>
+      <p>
+        To guarantee candidate attempts transition to <code>EVALUATED</code> without manual intervention or reliance on browser heartbeats, an authenticated serverless endpoint was deployed and coupled with standard Vercel Cron scheduling.
+      </p>
+
+      <div class="mermaid">
+flowchart LR
+    A["Vercel Cron / External Scheduler<br/><code>* * * * *</code> (Every 1m)"] -->|Bearer CRON_SECRET| B["GET/POST /api/cron/finalize-overdue-attempts"]
+    B --> C{"Authenticate Request<br/>against CRON_SECRET"}
+    C -->|Unauthorized / Missing| D["401 Unauthorized / 500 Misconfig"]
+    C -->|Authorized| E["finalizeOverdueAttempts()"]
+    E --> F["Find attempts with<br/>IN_PROGRESS and expires_at &lt; NOW()"]
+    F --> G["Atomic CAS Status Update<br/>attemptStatus = SUBMITTED"]
+    G --> H["Scoring Engine Execution"]
+    H --> I["Commit Evaluation Record v1<br/>attemptStatus = EVALUATED"]
+    I --> J["Return JSON Telemetry<br/>HTTP 200 OK"]
+      </div>
+
+      <h3>Scheduler & Authorization Verification Matrix</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Spec ID</th>
+            <th>Verification Condition</th>
+            <th>Observed Behavior</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>SCHED-01</code></td>
+            <td>Cron invocation when <code>CRON_SECRET</code> is unconfigured in server environment</td>
+            <td>Fails closed with HTTP 500 error payload</td>
+            <td><span class="badge badge-pass">PASS</span></td>
+          </tr>
+          <tr>
+            <td><code>SCHED-02</code></td>
+            <td>Cron invocation with invalid or missing bearer token</td>
+            <td>Rejected with HTTP 401 Unauthorized</td>
+            <td><span class="badge badge-pass">PASS</span></td>
+          </tr>
+          <tr>
+            <td><code>SCHED-03</code></td>
+            <td>Cron invocation with valid Bearer token or <code>x-cron-secret</code> header</td>
+            <td>Authorized, triggers sweep, returns HTTP 200 with JSON stats</td>
+            <td><span class="badge badge-pass">PASS</span></td>
+          </tr>
+          <tr>
+            <td><code>SCHED-04</code></td>
+            <td>Unprivileged candidate calling <code>finalizeOverdueAttemptsAction</code></td>
+            <td>Strictly rejected with 401/403 (<code>MCQJ-ERR-4001</code> / <code>MCQJ-ERR-4003</code>)</td>
+            <td><span class="badge badge-pass">PASS</span></td>
+          </tr>
+          <tr>
+            <td><code>SCHED-05</code></td>
+            <td>Delayed scheduler execution (attempt expired 3 hours ago)</td>
+            <td>Immediate recovery: overdue attempt identified, scored, and finalized</td>
+            <td><span class="badge badge-pass">PASS</span></td>
+          </tr>
+          <tr>
+            <td><code>SCHED-06</code></td>
+            <td>Repeated sweep executions on clean state (Idempotency)</td>
+            <td>0 attempts finalized, 0 duplicate scorecards emitted</td>
+            <td><span class="badge badge-pass">PASS</span></td>
+          </tr>
+          <tr>
+            <td><code>SCHED-07</code></td>
+            <td>Database connection failure resilience</td>
+            <td>Returns HTTP 500 with error log, signaling external scheduler to retry</td>
+            <td><span class="badge badge-pass">PASS</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Section 3: Migration Safety & Prisma Isolation -->
+    <div class="section">
+      <h2>3. Migration Safety & Prisma CLI Isolation</h2>
+      <p>
+        Prior to Phase 12, <code>prisma.config.ts</code> utilized <code>dotenv.config({ path: ".env.local", override: true })</code>, which risked overwriting local process environment variables with remote Supabase credentials during CLI runs.
+      </p>
+      <div class="callout callout-info">
+        <strong>Environment Isolation Hardening:</strong><br>
+        <code>prisma.config.ts</code> now preserves existing <code>DIRECT_URL</code> and <code>DATABASE_URL</code> environment variables before invoking <code>dotenv</code>.
+        Furthermore, <code>scripts/bootstrap-test-db.mjs</code> runs <code>npx prisma migrate deploy</code> directly on the test container, ensuring the official <code>_prisma_migrations</code> tracking table exists locally and <code>npx prisma migrate status</code> reports 100% up to date.
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Migration Sequence</th>
+            <th>Migration Name</th>
+            <th>Type</th>
+            <th>Local Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>1</td><td><code>20261010145726_init_database_test</code></td><td>DDL</td><td>Applied</td></tr>
+          <tr><td>2</td><td><code>20261010164000_add_user_model</code></td><td>DDL</td><td>Applied</td></tr>
+          <tr><td>3</td><td><code>20261010191034_alter_user_id_uuid_and_enable_rls</code></td><td>DDL / Security</td><td>Applied</td></tr>
+          <tr><td>4</td><td><code>20261010192500_add_role_enum_to_users</code></td><td>DDL / Enum</td><td>Applied</td></tr>
+          <tr><td>5</td><td><code>20261012000000_phase3_domain_models_and_integrity_guards</code></td><td>DDL / Triggers</td><td>Applied</td></tr>
+          <tr><td>6</td><td><code>20261012140000_revoke_authenticated_privileged_rpc</code></td><td>Security</td><td>Applied</td></tr>
+          <tr><td>7</td><td><code>20261013000000_add_detailed_concepts_and_option_explanations</code></td><td>DDL</td><td>Applied</td></tr>
+          <tr><td>8</td><td><code>20261016000000_phase8_question_types_and_answer_evaluation</code></td><td>DDL</td><td>Applied</td></tr>
+          <tr><td>9</td><td><code>20261016120000_phase8_1_comprehension_passages_and_all_or_nothing_scoring</code></td><td>DDL</td><td>Applied</td></tr>
+          <tr><td>10</td><td><code>20261016140000_phase9_examination_engine_and_candidate_delivery</code></td><td>DDL / Ledger</td><td>Applied</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Section 4: Next.js 16 Turbopack Production Compilation -->
+    <div class="section">
+      <h2>4. Next.js 16 Turbopack Production Compilation</h2>
+      <p>
+        Next.js 16 with <code>cacheComponents</code> enabled prohibits legacy <code>export const dynamic = "force-dynamic"</code> statements in route handlers. The cron endpoint was modernized to use <code>await connection()</code> and explicit ESM subpath imports (<code>next/server.js</code>).
+      </p>
+      <pre><code>▲ Next.js 16.4.0 (Turbopack)
+- Environments: .env.local
+✓ Compiled successfully in 5.7s
+  Running TypeScript ...
+  Finished TypeScript in 16.6s ...
+✓ Generating static pages using 3 workers (23/23) in 3.1s
+
+Route (app)
+├ ƒ /api/cron/finalize-overdue
+├ ƒ /api/cron/finalize-overdue-attempts
+├ ƒ /api/db-health
+├ ◐ /exam/[paperId]
+├ ◐ /exam/[paperId]/attempt/[attemptId]
+└ ƒ /admin/papers</code></pre>
+    </div>
+
+    <!-- Section 5: Quality & Verification Matrix -->
+    <div class="section">
+      <h2>5. End-to-End Verification Matrix (201 / 201 Tests)</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Verification Dimension</th>
+            <th>Scope</th>
+            <th>Observed Result</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Unit & Domain Test Suites</strong></td>
+            <td>12 suites: scoring, auth, headers, admin, types, validation</td>
+            <td>124 / 124 Passing (8.0s)</td>
+            <td><span class="badge badge-pass">PASS</span></td>
+          </tr>
+          <tr>
+            <td><strong>PostgreSQL Exam Database Suite</strong></td>
+            <td>Attempt lifecycle, atomic CAS, answer ledger, privacy gates</td>
+            <td>20 / 20 Passing (6.8s)</td>
+            <td><span class="badge badge-pass">PASS</span></td>
+          </tr>
+          <tr>
+            <td><strong>PostgreSQL Core Domain Suite</strong></td>
+            <td>Immutability triggers, publication checks, schema invariants</td>
+            <td>19 / 19 Passing (5.1s)</td>
+            <td><span class="badge badge-pass">PASS</span></td>
+          </tr>
+          <tr>
+            <td><strong>PostgreSQL Workflow Suite</strong></td>
+            <td>Admin reordering, two-tier ledger, sequence swap rollback</td>
+            <td>10 / 10 Passing (2.9s)</td>
+            <td><span class="badge badge-pass">PASS</span></td>
+          </tr>
+          <tr>
+            <td><strong>PostgreSQL Passage Suite</strong></td>
+            <td>Passage linking, Urdu RTL rendering, Gate 7 validation</td>
+            <td>7 / 7 Passing (1.2s)</td>
+            <td><span class="badge badge-pass">PASS</span></td>
+          </tr>
+          <tr>
+            <td><strong>PostgreSQL Scheduler Suite</strong></td>
+            <td>Cron auth, delayed recovery, idempotency, failure retries</td>
+            <td>7 / 7 Passing (1.2s)</td>
+            <td><span class="badge badge-pass">PASS</span></td>
+          </tr>
+          <tr>
+            <td><strong>Candidate Lifecycle Browser E2E</strong></td>
+            <td>Playwright Chromium: Full candidate lifecycle from pledge to scorecard</td>
+            <td>14 / 14 Passing (34.2s)</td>
+            <td><span class="badge badge-pass">PASS</span></td>
+          </tr>
+          <tr>
+            <td><strong>Static Type Safety</strong></td>
+            <td>Entire codebase (<code>tsc --noEmit</code>)</td>
+            <td>0 Errors</td>
+            <td><span class="badge badge-pass">PASS</span></td>
+          </tr>
+          <tr>
+            <td><strong>Linter & Code Standards</strong></td>
+            <td>ESLint 9 (<code>next/core-web-vitals</code> + React 19)</td>
+            <td>0 Errors, 0 Warnings</td>
+            <td><span class="badge badge-pass">PASS</span></td>
+          </tr>
+          <tr>
+            <td><strong>Production Build</strong></td>
+            <td>Next.js 16.4.0 Turbopack</td>
+            <td>23 Routes Compiled (0 Errors)</td>
+            <td><span class="badge badge-pass">PASS</span></td>
+          </tr>
+          <tr>
+            <td><strong>Release Preflight Audit</strong></td>
+            <td>Sequential migrations, schema syntax, cron endpoints</td>
+            <td>Exit Code 0</td>
+            <td><span class="badge badge-pass">PASS</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Section 6: Next Steps & Human Authorization Gate -->
+    <div class="section">
+      <h2>6. Next Action Requiring Human Authorization</h2>
+      <div class="callout">
+        <strong>Remote Mutation Boundary:</strong><br>
+        All testing, triggers, and migrations were executed solely on the local Docker container. The hosted Supabase staging instance remains 100% untouched. Human authorization is required to apply the 10 forward-only migrations and deploy the production bundle.
+      </div>
+      <h3>Staging Release Deployment Checklist:</h3>
+      <ol>
+        <li>Configure hosting environment variables (<code>CRON_SECRET</code>, <code>DATABASE_URL</code>, <code>DIRECT_URL</code>).</li>
+        <li>Execute <code>npx prisma migrate deploy</code> targeting remote staging <code>DIRECT_URL</code> (port 5432).</li>
+        <li>Invoke <code>GET /api/db-health</code> to confirm database connectivity.</li>
+        <li>Trigger manual test sweep: <code>curl -H "Authorization: Bearer &lt;CRON_SECRET&gt;" https://staging.mcqjunction.com/api/cron/finalize-overdue-attempts</code>.</li>
+      </ol>
+    </div>
+  </div>
+</body>
+</html>

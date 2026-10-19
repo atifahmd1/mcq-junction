@@ -1,0 +1,136 @@
+{
+  "audit_version": "10.0.0",
+  "phase": "Phase 10: Full Candidate Lifecycle E2E, Recovery & Release Assurance",
+  "audit_date": "2026-10-16",
+  "status": "PASS",
+  "summary": {
+    "total_findings": 5,
+    "resolved": 5,
+    "unresolved": 0,
+    "critical": 0,
+    "high": 1,
+    "medium": 3,
+    "low": 1,
+    "informational": 0
+  },
+  "metrics": {
+    "lifecycle_states_supported": [
+      "NOT_STARTED",
+      "IN_PROGRESS",
+      "SUBMITTED",
+      "EXPIRED",
+      "EVALUATED"
+    ],
+    "question_types_verified": [
+      "SINGLE_CORRECT",
+      "MULTIPLE_CORRECT",
+      "ASSERTION_REASON",
+      "COMPREHENSION_CHILD"
+    ],
+    "languages_verified": [
+      "EN (English - LTR)",
+      "HI (Hindi - Devanagari Unicode)",
+      "UR (Urdu - Perso-Arabic RTL with isolated LTR options and actions)",
+      "BN (Bangla - Bengali Unicode)"
+    ],
+    "recovery_scenarios_verified": [
+      "Browser page reload during active attempt",
+      "Network disconnection and reconnect response re-sync",
+      "Deterministic question sequence and option shuffle preservation across reload",
+      "Preservation of answered state, review flags, and authoritative deadline"
+    ],
+    "automated_tests": {
+      "total_tests": 183,
+      "passed": 183,
+      "failed": 0,
+      "breakdown": {
+        "unit_and_domain_suites": 118,
+        "database_integration_suite": 19,
+        "e2e_workflows_suite": 10,
+        "passage_database_suite": 7,
+        "exam_database_suite": 15,
+        "browser_e2e_lifecycle_suite": 14
+      }
+    },
+    "browser_e2e_screenshots": {
+      "total_screenshots": 13,
+      "directory": "docs/reports/screenshots/phase10/",
+      "manifest": [
+        "01-unauth-redirect-login.png",
+        "02-candidate-exam-overview.png",
+        "03-candidate-instructions-pledge.png",
+        "04-exam-delivery-workspace-q1.png",
+        "05-q1-single-choice-answered.png",
+        "06-q2-multiple-correct-answered.png",
+        "07-q3-assertion-reason-marked-review.png",
+        "08-q4-comprehension-urdu-rtl.png",
+        "09-exam-resumed-after-refresh.png",
+        "10-submit-confirmation-modal.png",
+        "11-exam-evaluated-scorecard.png",
+        "12-completed-exam-entry-locked.png",
+        "13-cross-candidate-access-denied.png"
+      ]
+    },
+    "static_analysis": {
+      "typescript_errors": 0,
+      "eslint_errors": 0,
+      "eslint_warnings": 0,
+      "next_production_build": "SUCCESS (17 App Router routes compiled cleanly with Turbopack and Partial Prerendering)"
+    },
+    "database_verification": {
+      "docker_container": "mcqj-postgres-test",
+      "engine_version": "PostgreSQL 16.13",
+      "endpoint": "127.0.0.1:5433/mcq_junction_test",
+      "migrations_applied": 10,
+      "remote_database_mutations": 0,
+      "isolation_safety": "FAIL-CLOSED"
+    }
+  },
+  "findings": [
+    {
+      "finding_id": "PHASE10-DEFECT-01",
+      "title": "Optimistic Concurrency & Version-Predicate CAS in Answer Ledger Persistence",
+      "severity": "HIGH",
+      "category": "CONCURRENCY_INTEGRITY",
+      "description": "Non-atomic read-then-upsert in saveAttemptAnswer permitted concurrent client writes to silently overwrite newer response data without version checking.",
+      "resolution": "Implemented atomic CAS via prisma.attemptResponse.updateMany({ where: { id: existing.id, version: input.clientVersion }, data: { ... version: nextVersion } }). Rejections return STALE_REJECTED with authoritative current row. Unique constraint handles first-time concurrent inserts safely.",
+      "status": "RESOLVED"
+    },
+    {
+      "finding_id": "PHASE10-DEFECT-02",
+      "title": "Server-Authoritative Deadline Finalization & Background Sweeps",
+      "severity": "MEDIUM",
+      "category": "EXAMINATION_POLICY",
+      "description": "Client network latency grace windows could leak unauthorized post-expiry answer submissions, and abandoned attempts remained IN_PROGRESS indefinitely.",
+      "resolution": "Enforced strict zero-grace deadline check on server answer saves (MCQJ-ERR-6003, 403 Forbidden). Implemented finalizeOverdueAttempts background sweep that detects overdue sessions and triggers atomic evaluation.",
+      "status": "RESOLVED"
+    },
+    {
+      "finding_id": "PHASE10-DEFECT-03",
+      "title": "Race-Proof Idempotent Final Submission Handling",
+      "severity": "MEDIUM",
+      "category": "TRANSACTIONAL_INTEGRITY",
+      "description": "Rapid double-click on Final Submit or concurrent auto-submit triggered duplicate evaluation attempts or database unique constraint collisions.",
+      "resolution": "Applied atomic status CAS on submitExamAttempt requiring status IN_PROGRESS or EXPIRED to transition to SUBMITTED. Subsequent requests immediately return the authoritative evaluation v1 idempotently.",
+      "status": "RESOLVED"
+    },
+    {
+      "finding_id": "PHASE10-DEFECT-04",
+      "title": "React 19 Render-Phase Side-Effect in ExamDeliveryClient",
+      "severity": "MEDIUM",
+      "category": "CLIENT_ARCHITECTURE",
+      "description": "Dispatching async Server Action persistAnswer directly inside functional state updaters (setResponses) violated React pure render constraints, throwing 'Cannot update a component while rendering a different component'.",
+      "resolution": "Separated optimistic state transition from network dispatch. Async persistence executes strictly after synchronous state updates in top-level event handlers.",
+      "status": "RESOLVED"
+    },
+    {
+      "finding_id": "PHASE10-DEFECT-05",
+      "title": "Turbopack HMR Keepalive Hang in Browser E2E Test Suite",
+      "severity": "LOW",
+      "category": "TEST_AUTOMATION",
+      "description": "Using page.goto(url, { waitUntil: 'networkidle' }) under Next.js 16 Turbopack hung indefinitely due to persistent HMR EventSource streams.",
+      "resolution": "Switched navigation wait policy to domcontentloaded combined with explicit Playwright locator visibility checks (locator.waitFor({ state: 'visible' })). Tests execute 100% reliably in sub-second steps.",
+      "status": "RESOLVED"
+    }
+  ]
+}

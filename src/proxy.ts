@@ -53,18 +53,30 @@ export async function proxy(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Protect /dashboard routes: redirect unauthenticated requests to signin
-  if (!user && request.nextUrl.pathname.startsWith("/dashboard")) {
+  // Protect /dashboard and /admin routes: redirect unauthenticated requests to signin
+  if (
+    !user &&
+    (request.nextUrl.pathname.startsWith("/dashboard") ||
+      request.nextUrl.pathname.startsWith("/admin"))
+  ) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = "/auth/signin";
     redirectUrl.searchParams.set("next", request.nextUrl.pathname);
     return NextResponse.redirect(redirectUrl);
   }
 
-  // If already authenticated and visiting signin, redirect to dashboard
+  // If already authenticated and visiting signin, redirect to safe next or dashboard
   if (user && request.nextUrl.pathname === "/auth/signin") {
+    const rawNext = request.nextUrl.searchParams.get("next");
+    const safeNext =
+      rawNext &&
+      rawNext.startsWith("/") &&
+      !rawNext.startsWith("//") &&
+      !rawNext.startsWith("/\\")
+        ? rawNext
+        : "/dashboard";
     const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = "/dashboard";
+    redirectUrl.pathname = safeNext;
     redirectUrl.searchParams.delete("next");
     return NextResponse.redirect(redirectUrl);
   }

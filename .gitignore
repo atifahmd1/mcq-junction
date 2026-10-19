@@ -49,4 +49,6 @@ next-env.d.ts
 skills-lock.json
 audit-report.json
 notes.txt
+test-results/
+scratch/
 

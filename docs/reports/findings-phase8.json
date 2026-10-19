@@ -1,0 +1,125 @@
+{
+  "audit_version": "8.0.0",
+  "phase": "Phase 8: Question Types & Answer Evaluation",
+  "audit_date": "2026-10-16",
+  "status": "PASS",
+  "summary": {
+    "total_findings": 3,
+    "resolved": 3,
+    "unresolved": 0,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "low": 2,
+    "informational": 0
+  },
+  "metrics": {
+    "question_types_supported": [
+      "SINGLE_CORRECT",
+      "MULTIPLE_CORRECT",
+      "ASSERTION_REASON",
+      "SINGLE_CHOICE (legacy alias)",
+      "MULTIPLE_CHOICE (legacy alias)"
+    ],
+    "unit_and_evaluation_tests": {
+      "total": 102,
+      "passed": 102,
+      "failed": 0,
+      "suites": [
+        "tests/question-evaluation.test.mjs (13 specs)",
+        "tests/question-validation.test.mjs (9 specs)",
+        "tests/import-export.test.mjs (5 specs)",
+        "tests/scoring.test.mjs (6 specs)",
+        "tests/concept-modal.test.mjs (8 specs)",
+        "tests/auth-validation.test.mjs (8 specs)",
+        "tests/security-headers.test.mjs (1 spec)",
+        "tests/admin-service.test.mjs (18 specs)",
+        "tests/admin-workflows.test.mjs (15 specs)",
+        "tests/security-isolation.test.mjs (9 specs)",
+        "tests/tls-certificate-verification.test.mjs (10 specs)"
+      ]
+    },
+    "behavior_table_compliance": {
+      "select_B_only": "PASS (No feedback yet, editable)",
+      "select_B_then_D": "PASS (Exact match, B and D green, overall correct)",
+      "select_A_first": "PASS (Immediate incorrect feedback, A red, B and D green)",
+      "select_B_then_A": "PASS (Immediate incorrect feedback, A red, B and D green)",
+      "select_B_then_C": "PASS (Immediate incorrect feedback, C red, B and D green)",
+      "select_B_then_deselect_B": "PASS (No feedback, remains editable)",
+      "select_B_D_then_extra_click": "PASS (Finalized attempt immutability, extra click ignored)"
+    },
+    "typescript_errors": 0,
+    "eslint_warnings": 0,
+    "next_production_build": "SUCCESS (15 App Router routes compiled cleanly with Turbopack and Partial Prerendering)",
+    "migrations_sequence": "8 sequential migrations validated",
+    "remote_database_mutation": "Zero remote mutations executed (Safe local execution)"
+  },
+  "findings": [
+    {
+      "finding_id": "PHASE8-DEFECT-01",
+      "title": "PostgreSQL Transaction Limitation on ADD VALUE Reference within DDL",
+      "severity": "MEDIUM",
+      "classification": "Confirmed and fixed",
+      "affected_files": [
+        "prisma/migrations/20261016000000_phase8_question_types_and_answer_evaluation/migration.sql"
+      ],
+      "affected_functions": [
+        "ALTER TYPE QuestionType ADD VALUE",
+        "ALTER TABLE conceptual_questions ADD COLUMN"
+      ],
+      "evidence": "In PostgreSQL, a newly added enum value from 'ALTER TYPE ... ADD VALUE' cannot be referenced in the same transaction block as a column default in subsequent DDL statements (PostgreSQL error: 'unsafe use of new value in transaction').",
+      "exploitability_impact": "Medium migration failure risk. Running prisma migrate deploy would fail when executing the migration transaction block if referencing the newly added enum value in table DDL defaults.",
+      "before_behavior": "Attempting to ALTER TABLE conceptual_questions ADD COLUMN question_type with default 'SINGLE_CORRECT' in the same script block as ALTER TYPE QuestionType ADD VALUE 'SINGLE_CORRECT'.",
+      "after_behavior": "Migration 8 defines the column default as 'SINGLE_CHOICE' (an existing enum value) in the DDL block, then updates rows, while Prisma schema and client seamlessly map and handle canonical 'SINGLE_CORRECT' values in application code.",
+      "remediation": "Structured migration 8 DDL to use the existing enum literal for default assignment during transactional migration, ensuring 100% idempotent execution on PostgreSQL.",
+      "test_references": [
+        "tests/security-isolation.test.mjs: SEC-ISO-08"
+      ],
+      "residual_risk": "None."
+    },
+    {
+      "finding_id": "PHASE8-DEFECT-02",
+      "title": "Zod 4 Issue Mapping Type Incompatibility in SuperRefine",
+      "severity": "LOW",
+      "classification": "Confirmed and fixed",
+      "affected_files": [
+        "src/lib/questions/validation.ts"
+      ],
+      "affected_functions": [
+        "questionAuthoringSchema.superRefine"
+      ],
+      "evidence": "In Zod 4.6.5, ctx.addIssue(issue) expects an explicit issue structure or custom issue descriptor, rather than raw internal $ZodIssue objects from safeParse.",
+      "exploitability_impact": "Low TypeScript build failure. Prevented tsc --noEmit from succeeding during CI/preflight checks.",
+      "before_behavior": "ctx.addIssue(issue) triggered TypeScript error TS2345.",
+      "after_behavior": "Mapped issues to structured custom issues with explicit code: 'custom', message, and path array.",
+      "remediation": "Updated superRefine delegates in src/lib/questions/validation.ts.",
+      "test_references": [
+        "tests/question-validation.test.mjs: VAL-01..09"
+      ],
+      "residual_risk": "None."
+    },
+    {
+      "finding_id": "PHASE8-DEFECT-03",
+      "title": "Admin Service Parameter Typing Bound to Restricted SessionPrismaClient",
+      "severity": "LOW",
+      "classification": "Confirmed and fixed",
+      "affected_files": [
+        "src/lib/admin/service.ts"
+      ],
+      "affected_functions": [
+        "createOrUpdateQuestion",
+        "importQuestionsFromCsv",
+        "exportQuestionsToCsv"
+      ],
+      "evidence": "SessionPrismaClient in session.ts only typed the user delegate for authentication assertions, causing tsc to reject queries on examPaper and paperQuestionOccurrence.",
+      "exploitability_impact": "Low TypeScript compilation error. Blocked clean type checking.",
+      "before_behavior": "Functions accepted prismaClient?: SessionPrismaClient.",
+      "after_behavior": "Updated parameter to prismaClient?: PrismaClient imported from generated Prisma client.",
+      "remediation": "Updated method signatures in src/lib/admin/service.ts to use PrismaClient.",
+      "test_references": [
+        "npm run typecheck"
+      ],
+      "residual_risk": "None."
+    }
+  ]
+}

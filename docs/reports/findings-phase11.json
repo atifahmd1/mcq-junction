@@ -1,0 +1,109 @@
+{
+  "audit_version": "11.0.0",
+  "phase": "Phase 11: Staging Readiness, Security Closure & Operational Runbook",
+  "audit_date": "2026-10-19",
+  "status": "PASS WITH DOCUMENTED LIMITATIONS",
+  "summary": {
+    "total_findings": 4,
+    "resolved": 4,
+    "unresolved": 0,
+    "critical": 0,
+    "high": 1,
+    "medium": 2,
+    "low": 1,
+    "informational": 0
+  },
+  "metrics": {
+    "lifecycle_states_supported": [
+      "NOT_STARTED",
+      "IN_PROGRESS",
+      "SUBMITTED",
+      "EXPIRED",
+      "EVALUATED"
+    ],
+    "question_types_verified": [
+      "SINGLE_CORRECT",
+      "MULTIPLE_CORRECT",
+      "ASSERTION_REASON",
+      "COMPREHENSION_CHILD"
+    ],
+    "languages_verified": [
+      "EN (English - LTR)",
+      "HI (Hindi - Devanagari Unicode)",
+      "UR (Urdu - Perso-Arabic RTL with isolated LTR options and actions)",
+      "BN (Bangla - Bengali Unicode)"
+    ],
+    "automated_tests": {
+      "total_tests": 194,
+      "passed": 194,
+      "failed": 0,
+      "breakdown": {
+        "unit_and_domain_suites": 124,
+        "database_integration_suite": 56,
+        "browser_e2e_lifecycle_suite": 14
+      }
+    },
+    "static_analysis": {
+      "typescript_errors": 0,
+      "eslint_errors": 0,
+      "eslint_warnings": 0,
+      "next_production_build": "SUCCESS (21 App Router routes compiled cleanly with Turbopack and Partial Prerendering)"
+    },
+    "database_verification": {
+      "docker_container": "mcqj-postgres-test",
+      "engine_version": "PostgreSQL 16.13",
+      "endpoint": "127.0.0.1:5433/mcq_junction_test",
+      "migrations_applied": 10,
+      "remote_database_mutations": 0,
+      "isolation_safety": "FAIL-CLOSED"
+    }
+  },
+  "findings": [
+    {
+      "finding_id": "PHASE11-DEFECT-01",
+      "title": "Overdue Sweep Idempotency & Concurrent Submission Overlap",
+      "severity": "HIGH",
+      "category": "CONCURRENCY_INTEGRITY",
+      "description": "Risk that repeated or overlapping autonomous sweeps with candidate manual submissions could attempt double-evaluation or produce duplicate scoring records.",
+      "resolution": "Implemented and verified atomic state CAS and idempotent evaluation retrieval. Validated via DB-EXAM-16 (repeated sweeps), DB-EXAM-17 (concurrent manual submit & sweep), and DB-EXAM-18 (delayed sweep recovery). All resolve to strictly 1 evaluation record v1.",
+      "status": "RESOLVED"
+    },
+    {
+      "finding_id": "PHASE11-DEFECT-02",
+      "title": "Candidate API View Privacy & Answer Key Redaction",
+      "severity": "MEDIUM",
+      "category": "EXAMINATION_INTEGRITY",
+      "description": "Candidate delivery endpoints must never leak isCorrect flags, answer keys, or explanations in API payloads prior to official result disclosure.",
+      "resolution": "Enforced strict DTO projections in getExamAttempt and startExamAttempt, completely omitting isCorrect, correctOptionLabels, and answerKey. Verified via DB-EXAM-19.",
+      "status": "RESOLVED"
+    },
+    {
+      "finding_id": "PHASE11-DEFECT-03",
+      "title": "Candidate Lifecycle Browser Selector & Component Synchronization",
+      "severity": "LOW",
+      "category": "TEST_AUTOMATION",
+      "description": "Playwright test runner encountered ambiguous selectors where palette filter tabs matched question grid buttons and exact text matching was required for modal counters.",
+      "resolution": "Refined Playwright selectors to target aside .grid button with regex boundaries and exact text matches for modal completion stats. 14/14 browser specifications pass 100% green.",
+      "status": "RESOLVED"
+    },
+    {
+      "finding_id": "PHASE11-DEFECT-04",
+      "title": "Open-Redirect Vector Immunity & Next Path Strict Sanitization",
+      "severity": "MEDIUM",
+      "category": "APPLICATION_SECURITY",
+      "description": "Authentication signin and callback endpoints required validation against protocol-relative (//evil.com) and backslash (/\\evil.com) open-redirect vectors.",
+      "resolution": "Enforced sanitizeNextPath across signin page, OAuth action, and callback route. Added unit test suite in auth-validation.test.mjs covering malicious URL variations.",
+      "status": "RESOLVED"
+    }
+  ],
+  "limitations": [
+    {
+      "scope": "HOSTED_STAGING_DEPLOYMENT",
+      "description": "All 194 automated tests, database triggers, migrations, and builds ran against local disposable PostgreSQL 16 container (127.0.0.1:5433). Actual deployment to hosted Supabase Staging and Vercel hosting requires explicit human approval as defined in STAGING_RUNBOOK.md."
+    },
+    {
+      "scope": "LIVE_OAUTH_PROVIDERS",
+      "description": "OAuth callbacks (GitHub/Google) were verified via mock Supabase Auth server on 127.0.0.1:54321. Production OAuth keys must be added to Supabase dashboard before public end-user staging sign-in."
+    }
+  ]
+}

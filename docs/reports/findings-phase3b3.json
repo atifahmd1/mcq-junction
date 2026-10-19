@@ -1,0 +1,153 @@
+{
+  "audit_version": "3.3.0",
+  "phase": "Phase 3B.3: Authorization Contract, Credential Hygiene & Phase 4 Readiness",
+  "audit_date": "2026-10-12",
+  "status": "PASS WITH DOCUMENTED LIMITATIONS",
+  "summary": {
+    "total_findings": 5,
+    "critical": 1,
+    "high": 1,
+    "medium": 1,
+    "low": 0,
+    "informational": 2,
+    "resolved": 5,
+    "unresolved": 0
+  },
+  "findings": [
+    {
+      "finding_id": "SEC-FINDING-01",
+      "title": "Gate 0 Caller Role Confusion in SECURITY DEFINER Functions",
+      "severity": "CRITICAL",
+      "classification": "Confirmed and fixed",
+      "affected_files": [
+        "prisma/migrations/20261012000000_phase3_domain_models_and_integrity_guards/migration.sql"
+      ],
+      "affected_functions": [
+        "fn_publish_exam_paper",
+        "fn_reevaluate_paper_attempts"
+      ],
+      "evidence": "In PostgreSQL SECURITY DEFINER functions, CURRENT_USER evaluates to function owner ('postgres'), not the caller. Under initial implementation, unauthenticated callers entering with auth.uid() IS NULL triggered Guard 0.4.",
+      "exploitability_impact": "High. An authenticated student or unauthenticated caller executing via direct connection or PostgREST without auth.uid() could spoof p_admin_user_id.",
+      "before_behavior": "Evaluated CURRENT_USER IN ('postgres', 'service_role'), which always succeeded inside SECURITY DEFINER regardless of invocation context.",
+      "after_behavior": "Enforces SESSION_USER IN ('postgres', 'service_role') AND auth.role() IS NULL in Guard 0.4; explicitly rejects auth.role() = 'anon' in Guard 0.1; requires cryptographic auth.uid() in Guard 0.2.",
+      "remediation": "Updated migration.sql Gate 0 logic to check SESSION_USER and auth.role() nullity. Re-verified across all 18 database tests.",
+      "test_references": [
+        "tests/database.test.mjs: DB-11 (11.1, 11.2, 11.3, 11.4, 11.5, 11.6, 11.7, 11.8)",
+        "tests/database.test.mjs: DB-18 (18.1, 18.2, 18.3, 18.4, 18.5, 18.6)"
+      ]
+    },
+    {
+      "finding_id": "SEC-FINDING-02",
+      "title": "Alternate Parent Write Path Integrity Bypass in Booklet & Option Mappings",
+      "severity": "HIGH",
+      "classification": "Confirmed and fixed",
+      "affected_files": [
+        "prisma/migrations/20261012000000_phase3_domain_models_and_integrity_guards/migration.sql"
+      ],
+      "affected_functions": [
+        "fn_guard_booklet_question_mapping_occurrence_update",
+        "fn_guard_question_option_representation_update"
+      ],
+      "evidence": "While insert/update on booklet_option_mappings checked occurrence alignment, updating parent occurrence_id on booklet_question_mappings or representation_id on question_options could orphan or cross-wire child options.",
+      "exploitability_impact": "High. Could lead to corrupt answer key evaluation where options map to different questions than intended.",
+      "before_behavior": "Parent tables allowed occurrence_id and representation_id updates without verifying child option mapping presence.",
+      "after_behavior": "Triggers trg_booklet_qmap_occurrence_guard and trg_question_option_rep_guard block updates when child mappings exist, raising MCQJ-ERR-4008 and MCQJ-ERR-4009.",
+      "remediation": "Implemented parent mutation triggers in migration.sql and added NULL validation checks.",
+      "test_references": [
+        "tests/database.test.mjs: DB-06 (6.3, 6.5, 6.6, 6.7, 6.8)"
+      ]
+    },
+    {
+      "finding_id": "SEC-FINDING-03",
+      "title": "Plaintext Test Database Credentials in Test Harness Output & Documentation",
+      "severity": "MEDIUM",
+      "classification": "Confirmed and fixed",
+      "affected_files": [
+        "docker-compose.test.yml",
+        "tests/database.test.mjs",
+        "scripts/bootstrap-test-db.mjs",
+        "docs/reports/MCQ_Junction_Phase3B1_Database_Verification_Report.md",
+        "docs/reports/MCQ_Junction_Phase3B1_Database_Verification_Report.html",
+        "docs/reports/MCQ_Junction_Phase3B2_Security_Audit_Report.md",
+        "docs/reports/findings-phase3b2.json"
+      ],
+      "affected_functions": [],
+      "evidence": "A static disposable test password was hardcoded in plaintext in docker-compose.test.yml, test harness examples, and report files.",
+      "exploitability_impact": "Medium. While limited to local disposable test containers, hardcoding credentials violates credential-hygiene standards and risks pattern reuse.",
+      "before_behavior": "docker-compose.test.yml used fallback '${TEST_DB_PASSWORD:-...}' and documentation examples contained literal test passwords.",
+      "after_behavior": "docker-compose.test.yml mandates TEST_DB_PASSWORD with safe fail-closed interpolation syntax '${TEST_DB_PASSWORD:?Environment variable TEST_DB_PASSWORD is required for disposable test container}'. Literal test passwords scrubbed across 100% of repository files.",
+      "remediation": "Scrubbed all occurrences, enforced mandatory environment variable with fail-closed behavior, and verified dynamic disposable generation during test execution.",
+      "test_references": [
+        "tests/database.test.mjs: fail-closed safety check lines 16-25",
+        "scripts/bootstrap-test-db.mjs: fail-closed safety check lines 13-38"
+      ]
+    },
+    {
+      "finding_id": "SEC-FINDING-04",
+      "title": "PostgREST Defense-in-Depth for Anonymous Role Privilege Bounds",
+      "severity": "INFORMATIONAL",
+      "classification": "Confirmed and fixed",
+      "affected_files": [
+        "prisma/migrations/20261012000000_phase3_domain_models_and_integrity_guards/migration.sql"
+      ],
+      "affected_functions": [
+        "fn_publish_exam_paper",
+        "fn_reevaluate_paper_attempts"
+      ],
+      "evidence": "SQL REVOKE ALL FROM anon prevented PostgREST from exposing procedures to anonymous callers, but procedural bodies did not enforce internal defense-in-depth.",
+      "exploitability_impact": "Informational. Defense-in-depth against accidental future role grant mutations.",
+      "before_behavior": "Depended solely on SQL DDL GRANT/REVOKE statements.",
+      "after_behavior": "Added Guard 0.1 checking IF auth.role() = 'anon' THEN RAISE EXCEPTION 'MCQJ-ERR-5015: Unauthorized: Anonymous callers cannot execute publication procedure'.",
+      "remediation": "Added Guard 0.1 to both administrative procedures.",
+      "test_references": [
+        "tests/database.test.mjs: DB-11 (11.1, 11.7)"
+      ]
+    },
+    {
+      "finding_id": "AUTH-CONTRACT-01",
+      "title": "Formalization of Phase 4 Multi-Path Authorization Contracts",
+      "severity": "INFORMATIONAL",
+      "classification": "Confirmed and fixed",
+      "affected_files": [
+        "tests/database.test.mjs",
+        "prisma/migrations/20261012000000_phase3_domain_models_and_integrity_guards/migration.sql"
+      ],
+      "affected_functions": [
+        "fn_publish_exam_paper",
+        "fn_reevaluate_paper_attempts"
+      ],
+      "evidence": "Phase 4 implementation requires unambiguous contracts across Path A (PostgREST Client RPC with JWT), Path B (Next.js Server Action / Route Handler via Prisma direct connection), and Path C (Service Role / trusted background jobs).",
+      "exploitability_impact": "Informational. Prevents architectural mismatch and security regressions during Phase 4 UI and server action development.",
+      "before_behavior": "Integration tests only tested Path A (JWT claims) in DB-11.",
+      "after_behavior": "Added DB-18 verifying Path B direct execution, user role verification in users table, anti-spoofing guards, and Path C headless service-role fail-closed behavior.",
+      "remediation": "Formalized assertion contracts and implemented comprehensive DB-18 suite.",
+      "test_references": [
+        "tests/database.test.mjs: DB-18 (18.1 through 18.8)"
+      ]
+    }
+  ],
+  "verification_metrics": {
+    "database_integration_tests": {
+      "total": 18,
+      "passed": 18,
+      "failed": 0,
+      "duration_ms": 3818.88
+    },
+    "unit_tests": {
+      "total": 9,
+      "passed": 9,
+      "failed": 0,
+      "duration_ms": 1454.41
+    },
+    "static_analysis": {
+      "prisma_validate": "PASS",
+      "prisma_generate": "PASS",
+      "typescript_typecheck": "PASS (0 errors)",
+      "eslint": "PASS (0 errors, 0 warnings)",
+      "nextjs_build": "PASS (0 errors, optimized static & dynamic routes)"
+    }
+  },
+  "documented_limitations": [
+    "Tests executed against local disposable PostgreSQL 16 container with Supabase compatibility mocks (auth schema, JWT session variables). Remote Supabase PostgREST gateway, connection poolers, and live Supabase Auth tokens remain strictly un-mutated and will be verified during Phase 5 Production Readiness Gate."
+  ]
+}

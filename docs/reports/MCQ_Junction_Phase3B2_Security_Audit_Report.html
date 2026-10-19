@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MCQ Junction — Phase 3B.2 Security Audit & Database Integrity Sign-Off Report</title>
+  <style>
+    :root {
+      --bg-primary: #ffffff;
+      --bg-secondary: #f8fafc;
+      --bg-accent: #f1f5f9;
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --border-color: #cbd5e1;
+      --border-light: #e2e8f0;
+      --primary: #0284c7;
+      --primary-dark: #0369a1;
+      --primary-light: #e0f2fe;
+      --success: #16a34a;
+      --success-bg: #dcfce7;
+      --danger: #dc2626;
+      --danger-bg: #fee2e2;
+      --warning: #d97706;
+      --warning-bg: #fef3c7;
+      --code-bg: #0f172a;
+      --code-text: #f8fafc;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.65;
+      color: var(--text-main);
+      background-color: var(--bg-primary);
+      display: flex;
+    }
+
+    .sidebar {
+      width: 320px;
+      height: 100vh;
+      position: sticky;
+      top: 0;
+      background-color: var(--bg-secondary);
+      border-right: 1px solid var(--border-color);
+      padding: 28px 20px;
+      overflow-y: auto;
+      flex-shrink: 0;
+    }
+
+    .sidebar h2 {
+      font-size: 1.05rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--border-color);
+    }
+
+    .sidebar nav ul { list-style: none; }
+    .sidebar nav li { margin-bottom: 10px; }
+    .sidebar nav a {
+      text-decoration: none;
+      color: var(--text-main);
+      font-size: 0.9rem;
+      font-weight: 500;
+      display: block;
+      padding: 6px 10px;
+      border-radius: 6px;
+      transition: all 0.15s ease-in-out;
+    }
+    .sidebar nav a:hover {
+      background-color: var(--primary-light);
+      color: var(--primary-dark);
+    }
+
+    .main-content {
+      flex: 1;
+      padding: 40px 60px;
+      max-width: 1200px;
+      overflow-x: hidden;
+    }
+
+    .header-card {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: #ffffff;
+      padding: 36px;
+      border-radius: 12px;
+      margin-bottom: 40px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+
+    .header-card h1 {
+      font-size: 2.1rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      line-height: 1.25;
+    }
+
+    .header-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      font-size: 0.88rem;
+      color: #94a3b8;
+      margin-top: 16px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .badge-critical { background-color: #fee2e2; color: #991b1b; }
+    .badge-high { background-color: #ffedd5; color: #c2410c; }
+    .badge-medium { background-color: #fef3c7; color: #b45309; }
+    .badge-info { background-color: #e0f2fe; color: #0369a1; }
+    .badge-success { background-color: #dcfce7; color: #15803d; }
+
+    h2 {
+      font-size: 1.55rem;
+      margin-top: 48px;
+      margin-bottom: 20px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--border-light);
+      color: var(--text-main);
+    }
+
+    h3 {
+      font-size: 1.2rem;
+      margin-top: 28px;
+      margin-bottom: 14px;
+      color: var(--text-main);
+    }
+
+    p { margin-bottom: 16px; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0 32px 0;
+      font-size: 0.9rem;
+    }
+
+    th, td {
+      padding: 12px 14px;
+      text-align: left;
+      border: 1px solid var(--border-color);
+    }
+
+    th {
+      background-color: var(--bg-accent);
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    tr:nth-child(even) { background-color: var(--bg-secondary); }
+
+    pre {
+      background-color: var(--code-bg);
+      color: var(--code-text);
+      padding: 18px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.85rem;
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.88em;
+      background-color: var(--bg-accent);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    pre code {
+      background-color: transparent;
+      padding: 0;
+      border-radius: 0;
+      color: inherit;
+    }
+
+    .callout {
+      border-left: 4px solid var(--primary);
+      background-color: var(--primary-light);
+      padding: 16px 20px;
+      border-radius: 0 8px 8px 0;
+      margin: 24px 0;
+      font-size: 0.92rem;
+    }
+
+    .callout-success {
+      border-left-color: var(--success);
+      background-color: var(--success-bg);
+      color: #14532d;
+    }
+
+    .diagram-container {
+      background-color: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 24px;
+      margin: 24px 0;
+      overflow-x: auto;
+      text-align: center;
+    }
+
+    @media (max-width: 900px) {
+      body { flex-direction: column; }
+      .sidebar { width: 100%; height: auto; position: static; }
+      .main-content { padding: 24px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar Navigation -->
+  <aside class="sidebar">
+    <h2>Audit Navigation</h2>
+    <nav>
+      <ul>
+        <li><a href="#executive-summary">Executive Summary</a></li>
+        <li><a href="#findings-summary">Audit Findings (4)</a></li>
+        <li><a href="#audit-flow">Gate 0 Security Flow</a></li>
+        <li><a href="#finding-sec-01">SEC-01: Role Confusion</a></li>
+        <li><a href="#finding-sec-02">SEC-02: Option Mappings</a></li>
+        <li><a href="#finding-sec-03">SEC-03: Credential Hygiene</a></li>
+        <li><a href="#test-matrix">Real DB Test Matrix (17/17)</a></li>
+        <li><a href="#regression-ci">Full CI Regression Matrix</a></li>
+        <li><a href="#completion-decision">Sign-Off & Recommendations</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="header-card">
+      <div style="margin-bottom: 12px;">
+        <span class="badge badge-success">PHASE 3B.2 SIGNED OFF</span>
+        <span class="badge badge-info">POSTGRESQL 16 (DOCKER)</span>
+        <span class="badge badge-success">ALL FINDINGS CLOSED</span>
+      </div>
+      <h1>MCQ Junction — Phase 3B.2 Security Audit & Database Integrity Sign-Off Report</h1>
+      <p style="color: #cbd5e1; max-width: 800px;">
+        Exhaustive verification of procedural authorization, SECURITY DEFINER execution contexts, booklet option mapping write paths, credential hygiene, and end-to-end regression testing.
+      </p>
+      <div class="header-meta">
+        <div><strong>Document ID:</strong> MCQJ-AUDIT-v3.6.1-PHASE3B2-REPORT</div>
+        <div><strong>Target Environment:</strong> 127.0.0.1:5433 (tmpfs 1GB)</div>
+        <div><strong>Date:</strong> October 12, 2026</div>
+      </div>
+    </div>
+
+    <!-- Executive Summary -->
+    <section id="executive-summary">
+      <h2>Executive Summary</h2>
+      <p>
+        Phase 3B.2 conducted a rigorous, evidence-based security and database integrity audit of the MCQ Junction PostgreSQL layer before authorizing Phase 4 application feature implementation.
+      </p>
+      <div class="callout callout-success">
+        <strong>Audit Sign-Off Decision:</strong> All 4 identified findings (1 Critical, 1 High, 1 Medium, 1 Informational) have been remediated with verified database-level constraints and triggers in <code>migration.sql</code>. All 17 database integration tests and 9 unit tests pass green. It is <strong>certified safe to proceed to Phase 4</strong>.
+      </div>
+    </section>
+
+    <!-- Findings Summary Table -->
+    <section id="findings-summary">
+      <h2>Audit Findings Summary</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Finding ID</th>
+            <th>Severity</th>
+            <th>Vulnerability Description</th>
+            <th>Classification</th>
+            <th>Remediation Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>SEC-FINDING-01</strong></td>
+            <td><span class="badge badge-critical">CRITICAL</span></td>
+            <td>Gate 0 Caller Role Confusion in <code>SECURITY DEFINER</code> Procedures</td>
+            <td>Confirmed and fixed</td>
+            <td><span class="badge badge-success">RESOLVED</span> Hardened Gate 0 with SESSION_USER & auth.role checks</td>
+          </tr>
+          <tr>
+            <td><strong>SEC-FINDING-02</strong></td>
+            <td><span class="badge badge-high">HIGH</span></td>
+            <td>Alternate Write Paths Bypassing Option Mapping Occurrence Alignment</td>
+            <td>Confirmed and fixed</td>
+            <td><span class="badge badge-success">RESOLVED</span> Added parent update triggers on qmap and option tables</td>
+          </tr>
+          <tr>
+            <td><strong>SEC-FINDING-03</strong></td>
+            <td><span class="badge badge-medium">MEDIUM</span></td>
+            <td>Plaintext Test Database Credentials in Harness Output & Reports</td>
+            <td>Confirmed and fixed</td>
+            <td><span class="badge badge-success">RESOLVED</span> Parameterized compose and redacted plaintext passwords</td>
+          </tr>
+          <tr>
+            <td><strong>SEC-FINDING-04</strong></td>
+            <td><span class="badge badge-info">INFO</span></td>
+            <td>PostgREST Defense-in-Depth for Anonymous Role Privilege Bounds</td>
+            <td>Confirmed and fixed</td>
+            <td><span class="badge badge-success">RESOLVED</span> Added Guard 0.1 explicitly checking auth.role() = 'anon'</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Audit Flow Diagram (Pure Inline SVG, Zero CDN) -->
+    <section id="audit-flow">
+      <h2>Gate 0 Security Architecture Decision Flow</h2>
+      <p>
+        The diagram below illustrates the hardened Gate 0 caller authorization logic, executed entirely inside PostgreSQL procedures without external CDN dependencies:
+      </p>
+      <div class="diagram-container">
+        <svg width="860" height="420" viewBox="0 0 860 420" xmlns="http://www.w3.org/2000/svg" style="font-family: -apple-system, sans-serif; font-size: 13px;">
+          <!-- Styles -->
+          <defs>
+            <linearGradient id="blueGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#0284c7"/>
+              <stop offset="100%" stop-color="#0369a1"/>
+            </linearGradient>
+            <linearGradient id="redGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#ef4444"/>
+              <stop offset="100%" stop-color="#b91c1c"/>
+            </linearGradient>
+            <linearGradient id="greenGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#22c55e"/>
+              <stop offset="100%" stop-color="#15803d"/>
+            </linearGradient>
+            <linearGradient id="cardGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#f8fafc"/>
+              <stop offset="100%" stop-color="#e2e8f0"/>
+            </linearGradient>
+          </defs>
+
+          <!-- Caller Nodes -->
+          <rect x="20" y="30" width="180" height="50" rx="8" fill="url(#blueGrad)"/>
+          <text x="110" y="60" fill="#fff" font-weight="bold" text-anchor="middle">Client / PostgREST RPC</text>
+
+          <rect x="20" y="160" width="180" height="50" rx="8" fill="url(#blueGrad)"/>
+          <text x="110" y="190" fill="#fff" font-weight="bold" text-anchor="middle">Next.js Server Action / Prisma</text>
+
+          <rect x="20" y="290" width="180" height="50" rx="8" fill="url(#redGrad)"/>
+          <text x="110" y="320" fill="#fff" font-weight="bold" text-anchor="middle">Untrusted / Anonymous</text>
+
+          <!-- Decision Box: Gate 0 -->
+          <rect x="270" y="80" width="280" height="220" rx="10" fill="url(#cardGrad)" stroke="#cbd5e1" stroke-width="2"/>
+          <text x="410" y="110" fill="#0f172a" font-weight="bold" font-size="15" text-anchor="middle">Gate 0: Procedural Guard</text>
+
+          <text x="290" y="145" fill="#334155">1. auth.role() = 'anon'? -> REJECT</text>
+          <text x="290" y="175" fill="#334155">2. auth.uid() != null? -> Bind JWT</text>
+          <text x="290" y="205" fill="#334155">   Verify: auth.uid() = p_admin_id</text>
+          <text x="290" y="235" fill="#334155">3. SESSION_USER in ('postgres')</text>
+          <text x="290" y="255" fill="#334155">   and auth.role() is null? -> Backend</text>
+          <text x="290" y="280" fill="#334155">4. Otherwise -> FAIL CLOSED</text>
+
+          <!-- Outcome Nodes -->
+          <rect x="630" y="80" width="200" height="60" rx="8" fill="url(#redGrad)"/>
+          <text x="730" y="105" fill="#fff" font-weight="bold" text-anchor="middle">MCQJ-ERR-5015</text>
+          <text x="730" y="125" fill="#fee2e2" font-size="11" text-anchor="middle">Raise Exception & Abort</text>
+
+          <rect x="630" y="240" width="200" height="60" rx="8" fill="url(#greenGrad)"/>
+          <text x="730" y="265" fill="#fff" font-weight="bold" text-anchor="middle">Role Check: users.role</text>
+          <text x="730" y="285" fill="#dcfce7" font-size="11" text-anchor="middle">Must equal 'ADMIN'</text>
+
+          <!-- Connecting Arrows -->
+          <path d="M 200 55 L 270 120" stroke="#0284c7" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+          <path d="M 200 185 L 270 190" stroke="#0284c7" stroke-width="2" fill="none"/>
+          <path d="M 200 315 L 270 260" stroke="#ef4444" stroke-width="2" fill="none"/>
+
+          <path d="M 550 140 L 630 110" stroke="#ef4444" stroke-width="2" fill="none"/>
+          <path d="M 550 220 L 630 270" stroke="#22c55e" stroke-width="2" fill="none"/>
+        </svg>
+      </div>
+    </section>
+
+    <!-- Section: SEC-01 -->
+    <section id="finding-sec-01">
+      <h2>SEC-FINDING-01: Role Confusion in SECURITY DEFINER Functions</h2>
+      <p>
+        <strong>Finding Summary:</strong> In PostgreSQL, <code>CURRENT_USER</code> inside a <code>SECURITY DEFINER</code> function evaluates to the owner of the function (<code>postgres</code>). Prior code checked <code>ELSIF CURRENT_USER IN ('postgres', 'service_role')</code>, which always returned TRUE even for anonymous requests, accepting an unauthenticated <code>p_admin_user_id</code>.
+      </p>
+      <h3>Remediation Diff</h3>
+      <pre><code>-- BEFORE (Vulnerable):
+ELSIF CURRENT_USER IN ('postgres', 'service_role') THEN
+    ELSIF p_admin_user_id IS NOT NULL THEN
+        v_actual_caller_id := p_admin_user_id; -- Trusted unauthenticated parameter!
+
+-- AFTER (Hardened):
+-- Guard 0.1: Immediate rejection of anonymous callers
+IF auth.role() = 'anon' THEN
+    RAISE EXCEPTION 'MCQJ-ERR-5015: Unauthorized: Anonymous callers cannot execute publication procedure';
+END IF;
+
+-- Guard 0.2: PostgREST JWT session
+IF auth.uid() IS NOT NULL THEN
+    v_actual_caller_id := auth.uid();
+    IF p_admin_user_id IS NOT NULL AND p_admin_user_id &lt;&gt; v_actual_caller_id THEN
+        RAISE EXCEPTION 'MCQJ-ERR-5015: Caller identity mismatch: authenticated user cannot spoof administrator';
+    END IF;
+
+-- Guard 0.3: Authenticated web session missing JWT claim
+ELSIF auth.role() = 'authenticated' THEN
+    RAISE EXCEPTION 'MCQJ-ERR-5015: Unauthorized: Authenticated web session missing cryptographic user identity';
+
+-- Guard 0.4: Trusted Backend Direct Connection (uses SESSION_USER, not CURRENT_USER)
+ELSIF SESSION_USER IN ('postgres', 'service_role') AND auth.role() IS NULL THEN
+    IF p_admin_user_id IS NOT NULL THEN
+        v_actual_caller_id := p_admin_user_id;
+    ELSE
+        RAISE EXCEPTION 'MCQJ-ERR-5015: Unauthorized: Missing administrator identity in trusted backend execution';
+    END IF;
+
+ELSE
+    RAISE EXCEPTION 'MCQJ-ERR-5015: Unauthorized: Missing authenticated session context';
+END IF;</code></pre>
+    </section>
+
+    <!-- Section: SEC-02 -->
+    <section id="finding-sec-02">
+      <h2>SEC-FINDING-02: Option Mapping Alternate Write Paths</h2>
+      <p>
+        <strong>Finding Summary:</strong> While direct inserts into <code>booklet_option_mappings</code> were protected, parent updates on <code>booklet_question_mappings.occurrence_id</code> or <code>question_options.representation_id</code> could silently desynchronize option mappings from their occurrence.
+      </p>
+      <p>
+        <strong>Remediation:</strong> Added triggers <code>trg_booklet_qmap_occurrence_guard</code> (MCQJ-ERR-4008) and <code>trg_question_option_rep_guard</code> (MCQJ-ERR-4009) to reject parent occurrence alterations while option mappings exist.
+      </p>
+    </section>
+
+    <!-- Real DB Test Matrix -->
+    <section id="test-matrix">
+      <h2>PostgreSQL Integration Test Matrix (DB-01..17)</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Test ID</th>
+            <th>Domain</th>
+            <th>Tested Mechanism</th>
+            <th>Result</th>
+            <th>Time</th>
+            <th>Verified Code / Assertion</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>DB-01</strong></td>
+            <td>Immutability</td>
+            <td>UPDATE on published question text</td>
+            <td><span class="badge badge-success">PASS</span></td>
+            <td>167.1ms</td>
+            <td><code>MCQJ-ERR-4005</code></td>
+          </tr>
+          <tr>
+            <td><strong>DB-02</strong></td>
+            <td>Immutability</td>
+            <td>UPDATE section_id on published occurrence</td>
+            <td><span class="badge badge-success">PASS</span></td>
+            <td>185.2ms</td>
+            <td><code>MCQJ-ERR-4005</code></td>
+          </tr>
+          <tr>
+            <td><strong>DB-03</strong></td>
+            <td>Immutability</td>
+            <td>DELETE passage referenced by published paper</td>
+            <td><span class="badge badge-success">PASS</span></td>
+            <td>114.5ms</td>
+            <td><code>MCQJ-ERR-4004</code></td>
+          </tr>
+          <tr>
+            <td><strong>DB-04</strong></td>
+            <td>Hierarchy</td>
+            <td>Cross-paper booklet attempt assignment</td>
+            <td><span class="badge badge-success">PASS</span></td>
+            <td>210.3ms</td>
+            <td>Composite FK <code>fk_test_attempt_booklet</code></td>
+          </tr>
+          <tr>
+            <td><strong>DB-05</strong></td>
+            <td>Hierarchy</td>
+            <td>Cross-paper booklet question mapping</td>
+            <td><span class="badge badge-success">PASS</span></td>
+            <td>137.7ms</td>
+            <td>Composite FK <code>fk_bqm_occurrence_composite</code></td>
+          </tr>
+          <tr>
+            <td><strong>DB-06</strong></td>
+            <td>Hierarchy</td>
+            <td>8-point option mapping & parent update suite</td>
+            <td><span class="badge badge-success">PASS</span></td>
+            <td>197.5ms</td>
+            <td><code>MCQJ-ERR-4007</code>, <code>4008</code>, <code>4009</code></td>
+          </tr>
+          <tr>
+            <td><strong>DB-07</strong></td>
+            <td>Hierarchy</td>
+            <td>Cross-paper attempt response mapping</td>
+            <td><span class="badge badge-success">PASS</span></td>
+            <td>273.5ms</td>
+            <td>Composite FK <code>fk_response_occurrence_composite</code></td>
+          </tr>
+          <tr>
+            <td><strong>DB-08</strong></td>
+            <td>Publication Gate</td>
+            <td>Question sequence gap validation</td>
+            <td><span class="badge badge-success">PASS</span></td>
+            <td>74.7ms</td>
+            <td><code>MCQJ-ERR-5007</code></td>
+          </tr>
+          <tr>
+            <td><strong>DB-09</strong></td>
+            <td>Publication Gate</td>
+            <td>Unverified editorial representation</td>
+            <td><span class="badge badge-success">PASS</span></td>
+            <td>74.9ms</td>
+            <td><code>MCQJ-ERR-5008</code></td>
+          </tr>
+          <tr>
+            <td><strong>DB-10</strong></td>
+            <td>Publication Gate</td>
+            <td>Incomplete official answer key</td>
+            <td><span class="badge badge-success">PASS</span></td>
+            <td>73.0ms</td>
+            <td><code>MCQJ-ERR-5013</code></td>
+          </tr>
+          <tr>
+            <td><strong>DB-11</strong></td>
+            <td>Security Gate</td>
+            <td>10-point caller authorization & anti-spoofing suite</td>
+            <td><span class="badge badge-success">PASS</span></td>
+            <td>146.7ms</td>
+            <td><code>MCQJ-ERR-5015</code> (anon, spoof, null)</td>
+          </tr>
+          <tr>
+            <td><strong>DB-12</strong></td>
+            <td>Publication Gate</td>
+            <td>Happy path atomic publication</td>
+            <td><span class="badge badge-success">PASS</span></td>
+            <td>67.5ms</td>
+            <td><code>success: true, publish_status: PUBLISHED</code></td>
+          </tr>
+          <tr>
+            <td><strong>DB-13</strong></td>
+            <td>Atomicity</td>
+            <td>Transactional rollback on gate failure</td>
+            <td><span class="badge badge-success">PASS</span></td>
+            <td>70.7ms</td>
+            <td>Status verified at <code>VERIFIED</code></td>
+          </tr>
+          <tr>
+            <td><strong>DB-14</strong></td>
+            <td>Two-Tier Ledger</td>
+            <td>Original evaluation v1 immutability</td>
+            <td><span class="badge badge-success">PASS</span></td>
+            <td>82.9ms</td>
+            <td>v1 score and timestamp untouched</td>
+          </tr>
+          <tr>
+            <td><strong>DB-15</strong></td>
+            <td>Two-Tier Ledger</td>
+            <td>Single active evaluation partial index</td>
+            <td><span class="badge badge-success">PASS</span></td>
+            <td>84.6ms</td>
+            <td><code>23505 unique_violation</code></td>
+          </tr>
+          <tr>
+            <td><strong>DB-16</strong></td>
+            <td>Concurrency</td>
+            <td>Transactional advisory lock serialization</td>
+            <td><span class="badge badge-success">PASS</span></td>
+            <td>252.6ms</td>
+            <td>Advisory lock collision rejected (<code>false</code>)</td>
+          </tr>
+          <tr>
+            <td><strong>DB-17</strong></td>
+            <td>Scoring Bounds</td>
+            <td>Negative penalty & discrete target constraints</td>
+            <td><span class="badge badge-success">PASS</span></td>
+            <td>116.4ms</td>
+            <td><code>chk_section_negative_nonnegative</code></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Regression CI Table -->
+    <section id="regression-ci">
+      <h2>Full CI Regression Matrix</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Stage</th>
+            <th>Command</th>
+            <th>Exit Code</th>
+            <th>Duration</th>
+            <th>Result</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Prisma Validate</strong></td>
+            <td><code>npx prisma validate</code></td>
+            <td><strong>0</strong></td>
+            <td>1.2s</td>
+            <td><span class="badge badge-success">VALID</span></td>
+          </tr>
+          <tr>
+            <td><strong>Prisma Generate</strong></td>
+            <td><code>npm run db:generate</code></td>
+            <td><strong>0</strong></td>
+            <td>0.7s</td>
+            <td><span class="badge badge-success">GENERATED</span></td>
+          </tr>
+          <tr>
+            <td><strong>Unit Test Suite</strong></td>
+            <td><code>npm run test:unit</code></td>
+            <td><strong>0</strong></td>
+            <td>0.9s</td>
+            <td><span class="badge badge-success">9/9 PASS</span></td>
+          </tr>
+          <tr>
+            <td><strong>DB Integration Suite</strong></td>
+            <td><code>npm run test:db</code></td>
+            <td><strong>0</strong></td>
+            <td>2.6s</td>
+            <td><span class="badge badge-success">17/17 PASS</span></td>
+          </tr>
+          <tr>
+            <td><strong>Combined Suite</strong></td>
+            <td><code>npm test</code></td>
+            <td><strong>0</strong></td>
+            <td>3.6s</td>
+            <td><span class="badge badge-success">26/26 PASS</span></td>
+          </tr>
+          <tr>
+            <td><strong>TypeScript</strong></td>
+            <td><code>npm run typecheck</code></td>
+            <td><strong>0</strong></td>
+            <td>7.2s</td>
+            <td><span class="badge badge-success">0 ERRORS</span></td>
+          </tr>
+          <tr>
+            <td><strong>ESLint</strong></td>
+            <td><code>npm run lint</code></td>
+            <td><strong>0</strong></td>
+            <td>4.2s</td>
+            <td><span class="badge badge-success">0 ERRORS, 0 WARNINGS</span></td>
+          </tr>
+          <tr>
+            <td><strong>Production Build</strong></td>
+            <td><code>npm run build</code></td>
+            <td><strong>0</strong></td>
+            <td>24.9s</td>
+            <td><span class="badge badge-success">TURBOPACK SUCCESS</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Sign-Off & Recommendations -->
+    <section id="completion-decision">
+      <h2>Phase 3B.2 Sign-Off Decision & Next Phase Recommendations</h2>
+      <div class="callout callout-success">
+        <strong>Sign-Off Decision:</strong> Phase 3B.2 is signed off and marked COMPLETE. All critical and high findings are remediated and backed by passing regression tests.
+      </div>
+
+      <h3>Actionable Recommendations</h3>
+      <ul>
+        <li><strong>Safe to Proceed to Phase 4:</strong> Proceed to Phase 4 (Application Service Layer & Admin Workflows). The database enforces immutability, role authorization, and relational isolation natively.</li>
+        <li><strong>Separate Production Readiness Gate:</strong> Passing this audit certifies database integrity on PostgreSQL 16. It does not replace the Phase 5 Production Readiness Review, which will audit Supabase remote RLS policies, connection pooler modes, rate limiting, and secrets rotation.</li>
+      </ul>
+    </section>
+  </main>
+
+</body>
+</html>

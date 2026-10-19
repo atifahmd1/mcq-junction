@@ -24,14 +24,25 @@ function getSiteOrigin(): string {
   return "http://localhost:3000";
 }
 
-export async function signInWithOAuth(provider: "github" | "google") {
+export async function signInWithOAuth(
+  provider: "github" | "google",
+  nextPath?: string
+) {
   const origin = getSiteOrigin();
+
+  const safeNext =
+    nextPath &&
+    nextPath.startsWith("/") &&
+    !nextPath.startsWith("//") &&
+    !nextPath.startsWith("/\\")
+      ? nextPath
+      : "/dashboard";
 
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider,
     options: {
-      redirectTo: `${origin}/auth/callback`,
+      redirectTo: `${origin}/auth/callback?next=${encodeURIComponent(safeNext)}`,
     },
   });
 
@@ -79,7 +90,16 @@ export async function signInWithEmail(
     await syncUserRecord(data.user);
   }
 
-  redirect("/dashboard");
+  const rawNext = formData.get("next");
+  const next =
+    typeof rawNext === "string" &&
+    rawNext.startsWith("/") &&
+    !rawNext.startsWith("//") &&
+    !rawNext.startsWith("/\\")
+      ? rawNext
+      : "/dashboard";
+
+  redirect(next);
 }
 
 /**
@@ -132,7 +152,16 @@ export async function signUpWithEmail(
     };
   }
 
-  redirect("/dashboard");
+  const rawNext = formData.get("next");
+  const next =
+    typeof rawNext === "string" &&
+    rawNext.startsWith("/") &&
+    !rawNext.startsWith("//") &&
+    !rawNext.startsWith("/\\")
+      ? rawNext
+      : "/dashboard";
+
+  redirect(next);
 }
 
 /**

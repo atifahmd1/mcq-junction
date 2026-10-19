@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MCQ Junction — Phase 3B.4 Authorization Runtime Verification & Phase 4 Gate Report</title>
+  <style>
+    :root {
+      --bg: #090d16;
+      --card-bg: #111827;
+      --card-border: #1f2937;
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --primary: #3b82f6;
+      --primary-hover: #2563eb;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --accent: #8b5cf6;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      line-height: 1.6;
+      padding: 2.5rem 1.5rem;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    header {
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 2rem;
+      margin-bottom: 2.5rem;
+    }
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .badge-decision {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .badge-sub {
+      background: rgba(59, 130, 246, 0.15);
+      color: #60a5fa;
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      margin-left: 0.5rem;
+    }
+    h1 {
+      font-size: 2.25rem;
+      font-weight: 800;
+      margin-top: 1rem;
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.025em;
+      color: #ffffff;
+    }
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      margin-top: 1.5rem;
+      padding: 1rem;
+      background: var(--card-bg);
+      border-radius: 0.75rem;
+      border: 1px solid var(--card-border);
+    }
+    .meta-item { font-size: 0.9rem; }
+    .meta-label { color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; font-weight: 600; }
+    .meta-val { color: var(--text-main); font-weight: 500; margin-top: 0.25rem; }
+
+    section { margin-bottom: 3rem; }
+    h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--card-border);
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    h3 {
+      font-size: 1.15rem;
+      font-weight: 600;
+      margin: 1.5rem 0 0.75rem 0;
+      color: #e5e7eb;
+    }
+    p { margin-bottom: 1rem; color: #d1d5db; }
+    
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .callout {
+      border-left: 4px solid var(--primary);
+      background: rgba(59, 130, 246, 0.08);
+      padding: 1rem 1.25rem;
+      border-radius: 0 0.5rem 0.5rem 0;
+      margin: 1.25rem 0;
+    }
+    .callout-success {
+      border-left-color: var(--success);
+      background: rgba(16, 185, 129, 0.08);
+    }
+    .callout-warning {
+      border-left-color: var(--warning);
+      background: rgba(245, 158, 11, 0.08);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0 1.5rem 0;
+      font-size: 0.9rem;
+    }
+    th, td {
+      padding: 0.75rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--card-border);
+    }
+    th {
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+    }
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+    .status-pill {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 0.375rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-align: center;
+    }
+    .status-pass {
+      background: rgba(16, 185, 129, 0.2);
+      color: #10b981;
+      border: 1px solid rgba(16, 185, 129, 0.4);
+    }
+    .status-info {
+      background: rgba(59, 130, 246, 0.2);
+      color: #60a5fa;
+      border: 1px solid rgba(59, 130, 246, 0.4);
+    }
+
+    pre {
+      background: #06090e;
+      border: 1px solid var(--card-border);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      margin: 1rem 0;
+      color: #93c5fd;
+    }
+    code {
+      font-family: var(--font-mono);
+      background: rgba(255, 255, 255, 0.08);
+      padding: 0.15rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.85em;
+      color: #e2e8f0;
+    }
+
+    .diagram-container {
+      background: #06090e;
+      border: 1px solid var(--card-border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    svg {
+      max-width: 100%;
+      height: auto;
+    }
+
+    /* Print Stylesheet */
+    @media print {
+      body {
+        background: #ffffff !important;
+        color: #000000 !important;
+        padding: 0.5in !important;
+        font-size: 10pt !important;
+      }
+      .card, .meta-grid, pre, .diagram-container {
+        border: 1px solid #cccccc !important;
+        background: #ffffff !important;
+        color: #000000 !important;
+        box-shadow: none !important;
+      }
+      th { background: #f0f0f0 !important; color: #000000 !important; }
+      td { color: #000000 !important; border-bottom: 1px solid #cccccc !important; }
+      .badge, .status-pill {
+        border: 1px solid #000000 !important;
+        color: #000000 !important;
+        background: #f0f0f0 !important;
+      }
+      h1, h2, h3 { color: #000000 !important; }
+      p, li { color: #222222 !important; }
+      pre, code {
+        background: #f5f5f5 !important;
+        color: #000000 !important;
+      }
+      svg text { fill: #000000 !important; }
+      svg rect { stroke: #000000 !important; fill: #ffffff !important; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div>
+      <span class="badge badge-decision">PASS WITH DOCUMENTED LIMITATIONS</span>
+      <span class="badge badge-sub">PHASE 3B.4 VERIFIED</span>
+    </div>
+    <h1>MCQ Junction — Phase 3B.4 Authorization Runtime Verification & Phase 4 Gate Report</h1>
+    <p>Independent Runtime Identity Audit, Pooler Session Safety, 10-Case Boundary Verification & Phase 4 Entry Gate</p>
+    
+    <div class="meta-grid">
+      <div class="meta-item">
+        <div class="meta-label">Document ID</div>
+        <div class="meta-val"><code>MCQJ-AUDIT-v3.4.0-PHASE3B4</code></div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Audit Date</div>
+        <div class="meta-val">October 12, 2026</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Integration Tests</div>
+        <div class="meta-val" style="color:#10b981; font-weight:700;">18/18 PASS (2,850ms)</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Unit Test Suite</div>
+        <div class="meta-val" style="color:#10b981; font-weight:700;">9/9 PASS (811ms)</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Section 1: Executive Summary -->
+  <section>
+    <h2>1. Executive Summary & Gate Decision</h2>
+    <div class="card">
+      <p>
+        Phase 3B.4 provides independent, evidence-based verification of the MCQ Junction repository following Phase 3B.3 closure. This audit traces the production connection configuration, audits the PostgreSQL authorization boundary across all 10 mandated edge cases, verifies credential hygiene reproducibly, and reconciles the empirical test metrics.
+      </p>
+      <div class="callout callout-success">
+        <strong>Formal Decision: PASS WITH DOCUMENTED LIMITATIONS</strong><br>
+        All domain invariants, publication gates, and authorization contracts are certified inside PostgreSQL 16. The limitations are explicit: tests were executed against an isolated local Docker container with Supabase compatibility mocks rather than mutating the live remote Supabase project, and the service-layer Server Actions (<code>assertAdminSession()</code>, <code>publishExamPaperAction()</code>) were verified as specifications and driver-level tests, with their TypeScript implementation scheduled as the first deliverable of Phase 4 Module 1.
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 2: Production Database Identity Verification -->
+  <section>
+    <h2>2. Production-Intended Database Identity Verification</h2>
+    <div class="card">
+      <p>
+        Inspection of <code>prisma/schema.prisma</code>, <code>prisma.config.ts</code>, <code>src/lib/prisma.ts</code>, and <code>.env.example</code> confirms the intended dual-connection topology:
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>Environment Variable</th>
+            <th>Target Port</th>
+            <th>Connection Mode</th>
+            <th>Effective <code>SESSION_USER</code></th>
+            <th><code>auth.role()</code> / <code>auth.uid()</code></th>
+            <th>Gate 0 Match</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>DATABASE_URL</code></td>
+            <td><code>6543</code></td>
+            <td>Transaction Pooler (PgBouncer/Supavisor)</td>
+            <td><code>'postgres'</code></td>
+            <td><code>NULL</code> (not PostgREST)</td>
+            <td><strong>Guard 0.4: TRUE</strong></td>
+          </tr>
+          <tr>
+            <td><code>DIRECT_URL</code></td>
+            <td><code>5432</code></td>
+            <td>Direct Session Connection</td>
+            <td><code>'postgres'</code></td>
+            <td><code>NULL</code></td>
+            <td><strong>Guard 0.4: TRUE</strong></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Transaction Pooler Stale Session Context Analysis</h3>
+      <p>
+        In transaction-mode pooling (port 6543), physical PostgreSQL connections are shared among transactions. If application code executes session-level <code>SET</code> commands, that setting persists on the physical connection across subsequent transactions unless explicitly reset.
+      </p>
+      <div class="callout callout-warning">
+        <strong>Security Isolation Mandate:</strong> Next.js Server Actions must supply <code>p_admin_user_id</code> as an explicit parameter directly to <code>fn_publish_exam_paper(paper_id, admin_id)</code> rather than relying on session-level <code>SET</code>. In <code>migration.sql</code>, Guard 0.4 checks if <code>mcqj.caller_user_id</code> differs from <code>p_admin_user_id</code> and raises <code>MCQJ-ERR-5015: Caller identity mismatch</code>, preventing stale connection context from compromising execution. This was empirically verified in <strong>DB-18.11</strong>.
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 3: Authorization Boundary Audit -->
+  <section>
+    <h2>3. Authorization Boundary Audit (10 Core Cases)</h2>
+    <div class="card">
+      <p>
+        The administrative procedures <code>fn_publish_exam_paper()</code> and <code>fn_reevaluate_paper_attempts()</code> were verified against all 10 mandated edge cases:
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>Case #</th>
+            <th>Verification Case</th>
+            <th>Real Source Mechanism</th>
+            <th>Verification Test</th>
+            <th>Result</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>1</strong></td>
+            <td>Anonymous caller rejected</td>
+            <td>Guard 0.1 checks <code>auth.role() = 'anon'</code>; DDL revokes execute from anon</td>
+            <td>DB-11.1, DB-11.7</td>
+            <td><span class="status-pill status-pass">PASS</span></td>
+          </tr>
+          <tr>
+            <td><strong>2</strong></td>
+            <td>Authenticated non-admin rejected</td>
+            <td>Guard 0.2 queries <code>public.users</code>; rejects if <code>role <> 'ADMIN'</code></td>
+            <td>DB-11.2, DB-18.2</td>
+            <td><span class="status-pill status-pass">PASS</span></td>
+          </tr>
+          <tr>
+            <td><strong>3</strong></td>
+            <td>Client-supplied admin UUID mismatch rejected</td>
+            <td>Guard 0.2 enforces <code>p_admin_user_id = auth.uid()</code></td>
+            <td>DB-11.3, DB-18.5</td>
+            <td><span class="status-pill status-pass">PASS</span></td>
+          </tr>
+          <tr>
+            <td><strong>4</strong></td>
+            <td>Missing or invalid identity fails closed</td>
+            <td>Guard 0.3 rejects null JWT claims; Guard 0.4 rejects null admin ID</td>
+            <td>DB-11.4, DB-18.4</td>
+            <td><span class="status-pill status-pass">PASS</span></td>
+          </tr>
+          <tr>
+            <td><strong>5</strong></td>
+            <td>Suspended or revoked admin cannot act</td>
+            <td>Role demotion to <code>STUDENT</code> rejected natively by DB; account bans checked at auth layer</td>
+            <td>DB-18.9</td>
+            <td><span class="status-pill status-pass">PASS</span></td>
+          </tr>
+          <tr>
+            <td><strong>6</strong></td>
+            <td>Valid administrator performs authorized action</td>
+            <td>Master procedure transitions paper to <code>PUBLISHED</code>; returns audit JSON</td>
+            <td>DB-11.10, DB-18.1</td>
+            <td><span class="status-pill status-pass">PASS</span></td>
+          </tr>
+          <tr>
+            <td><strong>7</strong></td>
+            <td>Headless service-role follows accountability policy</td>
+            <td>Guard 0.5 triggers for PostgREST service_role because <code>auth.uid()</code> is null</td>
+            <td>DB-18.6</td>
+            <td><span class="status-pill status-pass">PASS</span></td>
+          </tr>
+          <tr>
+            <td><strong>8</strong></td>
+            <td>Direct backend follows trusted-server contract</td>
+            <td>Guard 0.4 evaluates <code>SESSION_USER = 'postgres'</code> and verified admin UUID</td>
+            <td>DB-18.1, DB-18.7</td>
+            <td><span class="status-pill status-pass">PASS</span></td>
+          </tr>
+          <tr>
+            <td><strong>9</strong></td>
+            <td>Concurrency & atomicity preserved</td>
+            <td>Advisory lock (<code>pg_advisory_xact_lock</code>) serializes calls; atomicity intact</td>
+            <td>DB-13, DB-16</td>
+            <td><span class="status-pill status-pass">PASS</span></td>
+          </tr>
+          <tr>
+            <td><strong>10</strong></td>
+            <td>Privileged functions not executable by PUBLIC/anon</td>
+            <td><code>information_schema.routine_privileges</code> verifies 0 grants for PUBLIC/anon</td>
+            <td>DB-18.10</td>
+            <td><span class="status-pill status-pass">PASS</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Public PostgREST Surface Exposure Trade-Off</h3>
+      <p>
+        In <code>migration.sql</code>, <code>GRANT EXECUTE ON FUNCTION ... TO authenticated</code> exposes publication and re-evaluation endpoints on the public PostgREST HTTP gateway. While Guard 0.2 verifies <code>ADMIN</code> role and rejects non-admins, Next.js Server Actions execute server-side via direct connection (<code>DATABASE_URL</code>). Direct client RPC is not required.
+      </p>
+      <div class="callout callout-success">
+        <strong>Phase 4 Module 1 Hardening Recommendation:</strong> Revoke <code>EXECUTE</code> from <code>authenticated</code> in Phase 4 Module 1, reserving execute grants strictly to <code>service_role</code> and direct superuser/owner (<code>postgres</code>). This completely eliminates administrative stored procedures from PostgREST's public surface.
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 4: Architecture Flow Diagram -->
+  <section>
+    <h2>4. Multi-Path Invocation Architecture</h2>
+    <div class="diagram-container">
+      <svg viewBox="0 0 950 460" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+        <rect width="950" height="460" fill="#0b1120" rx="12"/>
+        
+        <!-- Headers -->
+        <rect x="20" y="20" width="280" height="40" fill="#1e293b" rx="6"/>
+        <text x="160" y="45" fill="#94a3b8" font-family="sans-serif" font-size="14" font-weight="bold" text-anchor="middle">CLIENT INVOCATION</text>
+
+        <rect x="330" y="20" width="280" height="40" fill="#1e293b" rx="6"/>
+        <text x="470" y="45" fill="#94a3b8" font-family="sans-serif" font-size="14" font-weight="bold" text-anchor="middle">GATEWAY & RUNTIME</text>
+
+        <rect x="640" y="20" width="290" height="40" fill="#1e293b" rx="6"/>
+        <text x="785" y="45" fill="#94a3b8" font-family="sans-serif" font-size="14" font-weight="bold" text-anchor="middle">POSTGRESQL 16 KERNEL</text>
+
+        <!-- Path A -->
+        <rect x="30" y="80" width="260" height="85" fill="#1e3a8a" stroke="#3b82f6" stroke-width="1.5" rx="8"/>
+        <text x="45" y="105" fill="#93c5fd" font-family="sans-serif" font-size="13" font-weight="bold">PATH A: PostgREST RPC</text>
+        <text x="45" y="125" fill="#cbd5e1" font-family="sans-serif" font-size="11">Client Browser / Mobile App</text>
+        <text x="45" y="145" fill="#94a3b8" font-family="sans-serif" font-size="10">Passes Bearer JWT with sub = user_id</text>
+
+        <path d="M 290 122 L 340 122" stroke="#3b82f6" stroke-width="2"/>
+
+        <rect x="340" y="80" width="260" height="85" fill="#0f172a" stroke="#334155" stroke-width="1.5" rx="8"/>
+        <text x="355" y="105" fill="#e2e8f0" font-family="sans-serif" font-size="13" font-weight="bold">Supabase PostgREST</text>
+        <text x="355" y="125" fill="#94a3b8" font-family="sans-serif" font-size="11">SET LOCAL ROLE authenticated;</text>
+        <text x="355" y="145" fill="#94a3b8" font-family="sans-serif" font-size="11">SET LOCAL request.jwt.claim.sub;</text>
+
+        <path d="M 600 122 L 650 122" stroke="#3b82f6" stroke-width="2"/>
+
+        <rect x="650" y="80" width="270" height="85" fill="#064e3b" stroke="#10b981" stroke-width="1.5" rx="8"/>
+        <text x="665" y="105" fill="#6ee7b7" font-family="sans-serif" font-size="13" font-weight="bold">Guard 0.2: auth.uid() Check</text>
+        <text x="665" y="125" fill="#a7f3d0" font-family="sans-serif" font-size="11">Enforces p_admin_id = auth.uid()</text>
+        <text x="665" y="145" fill="#34d399" font-family="sans-serif" font-size="10">Verified role = 'ADMIN' in users</text>
+
+        <!-- Path B -->
+        <rect x="30" y="190" width="260" height="110" fill="#1e1b4b" stroke="#8b5cf6" stroke-width="1.5" rx="8"/>
+        <text x="45" y="215" fill="#c4b5fd" font-family="sans-serif" font-size="13" font-weight="bold">PATH B: Server Action</text>
+        <text x="45" y="235" fill="#cbd5e1" font-family="sans-serif" font-size="11">Browser invokes Server Action</text>
+        <text x="45" y="255" fill="#94a3b8" font-family="sans-serif" font-size="10">Session cookies verified on server</text>
+        <text x="45" y="275" fill="#94a3b8" font-family="sans-serif" font-size="10">Calls assertAdminSession()</text>
+
+        <path d="M 290 245 L 340 245" stroke="#8b5cf6" stroke-width="2"/>
+
+        <rect x="340" y="190" width="260" height="110" fill="#0f172a" stroke="#334155" stroke-width="1.5" rx="8"/>
+        <text x="355" y="215" fill="#e2e8f0" font-family="sans-serif" font-size="13" font-weight="bold">Next.js App Router (Node.js)</text>
+        <text x="355" y="235" fill="#cbd5e1" font-family="sans-serif" font-size="11">supabase.auth.getUser() validated</text>
+        <text x="355" y="255" fill="#94a3b8" font-family="sans-serif" font-size="11">Prisma DATABASE_URL pooler (6543)</text>
+        <text x="355" y="275" fill="#94a3b8" font-family="sans-serif" font-size="10">SESSION_USER = 'postgres'</text>
+
+        <path d="M 600 245 L 650 245" stroke="#8b5cf6" stroke-width="2"/>
+
+        <rect x="650" y="190" width="270" height="110" fill="#064e3b" stroke="#10b981" stroke-width="1.5" rx="8"/>
+        <text x="665" y="215" fill="#6ee7b7" font-family="sans-serif" font-size="13" font-weight="bold">Guard 0.4: Trusted Backend</text>
+        <text x="665" y="235" fill="#a7f3d0" font-family="sans-serif" font-size="11">SESSION_USER = 'postgres'</text>
+        <text x="665" y="255" fill="#a7f3d0" font-family="sans-serif" font-size="11">AND auth.role() IS NULL</text>
+        <text x="665" y="275" fill="#34d399" font-family="sans-serif" font-size="10">p_admin_id verified in users table</text>
+
+        <!-- Path C -->
+        <rect x="30" y="325" width="260" height="85" fill="#450a0a" stroke="#ef4444" stroke-width="1.5" rx="8"/>
+        <text x="45" y="350" fill="#fca5a5" font-family="sans-serif" font-size="13" font-weight="bold">PATH C: Headless Service Role</text>
+        <text x="45" y="370" fill="#cbd5e1" font-family="sans-serif" font-size="11">Cron / Background Worker</text>
+        <text x="45" y="390" fill="#94a3b8" font-family="sans-serif" font-size="10">Calls PostgREST via service_role key</text>
+
+        <path d="M 290 367 L 340 367" stroke="#ef4444" stroke-width="2"/>
+
+        <rect x="340" y="325" width="260" height="85" fill="#0f172a" stroke="#334155" stroke-width="1.5" rx="8"/>
+        <text x="355" y="350" fill="#e2e8f0" font-family="sans-serif" font-size="13" font-weight="bold">Supabase PostgREST</text>
+        <text x="355" y="370" fill="#94a3b8" font-family="sans-serif" font-size="11">SET LOCAL ROLE service_role;</text>
+        <text x="355" y="390" fill="#94a3b8" font-family="sans-serif" font-size="11">auth.uid() IS NULL</text>
+
+        <path d="M 600 367 L 650 367" stroke="#ef4444" stroke-width="2"/>
+
+        <rect x="650" y="325" width="270" height="85" fill="#7f1d1d" stroke="#ef4444" stroke-width="1.5" rx="8"/>
+        <text x="665" y="350" fill="#fca5a5" font-family="sans-serif" font-size="13" font-weight="bold">Guard 0.5: FAIL CLOSED</text>
+        <text x="665" y="370" fill="#fecaca" font-family="sans-serif" font-size="11">MCQJ-ERR-5015: Missing session</text>
+        <text x="665" y="390" fill="#ef4444" font-family="sans-serif" font-size="10">Headless mutation rejected (audited admin req)</text>
+      </svg>
+    </div>
+  </section>
+
+  <!-- Section 5: Empirical Verification Matrix -->
+  <section>
+    <h2>5. Empirical Verification Matrix (18/18 DB + 9/9 Unit PASS)</h2>
+    <div class="card">
+      <h3>PostgreSQL 16 Integration Suite Execution</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Test ID</th>
+            <th>Verification Domain</th>
+            <th>Enforcement Mechanism</th>
+            <th>Result</th>
+            <th>Duration</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>DB-01</strong></td>
+            <td>Immutability</td>
+            <td>Trigger blocks UPDATE on published question</td>
+            <td><span class="status-pill status-pass">PASS</span></td>
+            <td>124.9ms</td>
+          </tr>
+          <tr>
+            <td><strong>DB-02</strong></td>
+            <td>Immutability</td>
+            <td>Trigger blocks reparenting question out of published paper</td>
+            <td><span class="status-pill status-pass">PASS</span></td>
+            <td>157.1ms</td>
+          </tr>
+          <tr>
+            <td><strong>DB-03</strong></td>
+            <td>Immutability</td>
+            <td>Trigger blocks deleting passage referenced by published paper</td>
+            <td><span class="status-pill status-pass">PASS</span></td>
+            <td>92.8ms</td>
+          </tr>
+          <tr>
+            <td><strong>DB-04</strong></td>
+            <td>Relational Integrity</td>
+            <td>Composite FK blocks cross-paper booklet assignment</td>
+            <td><span class="status-pill status-pass">PASS</span></td>
+            <td>185.4ms</td>
+          </tr>
+          <tr>
+            <td><strong>DB-05</strong></td>
+            <td>Relational Integrity</td>
+            <td>Composite FK blocks cross-paper question mapping</td>
+            <td><span class="status-pill status-pass">PASS</span></td>
+            <td>190.4ms</td>
+          </tr>
+          <tr>
+            <td><strong>DB-06</strong></td>
+            <td>Relational Integrity</td>
+            <td>Triggers block cross-question option mappings and parent updates</td>
+            <td><span class="status-pill status-pass">PASS</span></td>
+            <td>179.8ms</td>
+          </tr>
+          <tr>
+            <td><strong>DB-07</strong></td>
+            <td>Relational Integrity</td>
+            <td>Composite FK blocks cross-paper attempt response mapping</td>
+            <td><span class="status-pill status-pass">PASS</span></td>
+            <td>127.3ms</td>
+          </tr>
+          <tr>
+            <td><strong>DB-08</strong></td>
+            <td>Publication Gate</td>
+            <td>Gate 5 sequence contiguity check rejects gaps</td>
+            <td><span class="status-pill status-pass">PASS</span></td>
+            <td>74.3ms</td>
+          </tr>
+          <tr>
+            <td><strong>DB-09</strong></td>
+            <td>Publication Gate</td>
+            <td>Gate 6 editorial verification check rejects unverified representations</td>
+            <td><span class="status-pill status-pass">PASS</span></td>
+            <td>71.2ms</td>
+          </tr>
+          <tr>
+            <td><strong>DB-10</strong></td>
+            <td>Publication Gate</td>
+            <td>Gate 10 answer key coverage check rejects incomplete keys</td>
+            <td><span class="status-pill status-pass">PASS</span></td>
+            <td>71.3ms</td>
+          </tr>
+          <tr>
+            <td><strong>DB-11</strong></td>
+            <td>Security Gate</td>
+            <td>10-point caller authorization suite rejects invalid/spoofed callers</td>
+            <td><span class="status-pill status-pass">PASS</span></td>
+            <td>142.7ms</td>
+          </tr>
+          <tr>
+            <td><strong>DB-12</strong></td>
+            <td>Publication Gate</td>
+            <td>Master publication procedure transitions paper to PUBLISHED</td>
+            <td><span class="status-pill status-pass">PASS</span></td>
+            <td>76.3ms</td>
+          </tr>
+          <tr>
+            <td><strong>DB-13</strong></td>
+            <td>Publication Gate</td>
+            <td>Failed publication leaves paper in VERIFIED state (atomicity)</td>
+            <td><span class="status-pill status-pass">PASS</span></td>
+            <td>70.4ms</td>
+          </tr>
+          <tr>
+            <td><strong>DB-14</strong></td>
+            <td>Two-Tier Ledger</td>
+            <td>Original evaluation v1 remains immutable after re-evaluation</td>
+            <td><span class="status-pill status-pass">PASS</span></td>
+            <td>82.3ms</td>
+          </tr>
+          <tr>
+            <td><strong>DB-15</strong></td>
+            <td>Two-Tier Ledger</td>
+            <td>Partial unique index guarantees single active evaluation</td>
+            <td><span class="status-pill status-pass">PASS</span></td>
+            <td>187.6ms</td>
+          </tr>
+          <tr>
+            <td><strong>DB-16</strong></td>
+            <td>Concurrency</td>
+            <td>Session advisory lock serializes concurrent publication requests</td>
+            <td><span class="status-pill status-pass">PASS</span></td>
+            <td>329.9ms</td>
+          </tr>
+          <tr>
+            <td><strong>DB-17</strong></td>
+            <td>Scoring & Policies</td>
+            <td>Check constraints enforce nonnegative penalty and positive marks</td>
+            <td><span class="status-pill status-pass">PASS</span></td>
+            <td>183.7ms</td>
+          </tr>
+          <tr>
+            <td><strong>DB-18</strong></td>
+            <td>Phase 4 Auth Contract</td>
+            <td>11-point suite: Path B direct connection, users table role check, anti-spoofing rejection, Path C headless rejection, demoted admin rejection, routine privileges on PUBLIC/anon, stale session context protection</td>
+            <td><span class="status-pill status-pass">PASS</span></td>
+            <td>174.4ms</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>CI Pipeline Validation Matrix</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Validation Step</th>
+            <th>Tool / Command</th>
+            <th>Observed Result</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Unit Test Suite</td>
+            <td><code>npm run test:unit</code></td>
+            <td><span class="status-pill status-pass">9/9 PASS (811.39ms)</span></td>
+          </tr>
+          <tr>
+            <td>Database Integration</td>
+            <td><code>npm run test:db</code></td>
+            <td><span class="status-pill status-pass">18/18 PASS (2,850.24ms)</span></td>
+          </tr>
+          <tr>
+            <td>Prisma Schema Validation</td>
+            <td><code>npx prisma validate</code></td>
+            <td><span class="status-pill status-pass">VALID</span></td>
+          </tr>
+          <tr>
+            <td>Prisma Client Generation</td>
+            <td><code>npm run db:generate</code></td>
+            <td><span class="status-pill status-pass">GENERATED (745ms)</span></td>
+          </tr>
+          <tr>
+            <td>TypeScript Strict Typecheck</td>
+            <td><code>npm run typecheck</code></td>
+            <td><span class="status-pill status-pass">0 ERRORS</span></td>
+          </tr>
+          <tr>
+            <td>ESLint Code Quality</td>
+            <td><code>npm run lint</code></td>
+            <td><span class="status-pill status-pass">0 ERRORS / 0 WARNINGS</span></td>
+          </tr>
+          <tr>
+            <td>Next.js Production Build</td>
+            <td><code>npm run build</code></td>
+            <td><span class="status-pill status-pass">SUCCESS (Turbopack)</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Section 6: Next.js Service Layer Checklist -->
+  <section>
+    <h2>6. Phase 4 Module 1 Implementation Checklist</h2>
+    <div class="card">
+      <p>
+        The functions <code>assertAdminSession()</code> and <code>publishExamPaperAction()</code> do not yet exist in <code>src/</code>. They must be constructed during Phase 4 Module 1 adhering strictly to this checklist:
+      </p>
+      <ul>
+        <li><strong>Server-Side Session Verification:</strong> Use <code>supabase.auth.getUser()</code> in <code>assertAdminSession()</code>; never trust unverified <code>getSession()</code> cookies.</li>
+        <li><strong>Account Suspension Check:</strong> Verify <code>user.banned_until</code> is null or expired.</li>
+        <li><strong>Database Role Verification:</strong> Query <code>prisma.user.findUnique</code> and assert <code>role === 'ADMIN'</code>.</li>
+        <li><strong>Direct Parameter Passing:</strong> Supply <code>admin.id</code> directly as the explicit parameter to <code>fn_publish_exam_paper</code>; forbid session-level <code>SET mcqj.caller_user_id</code>.</li>
+        <li><strong>Public Surface Hardening:</strong> Revoke execute on administrative procedures from <code>authenticated</code> role in Phase 4 migration.</li>
+        <li><strong>Input Validation & Sanitization:</strong> Validate all paper UUIDs and input payloads using Zod schemas.</li>
+        <li><strong>Error Masking:</strong> Catch database exceptions and strip connection internals from user-facing responses.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Section 7: Final Sign-Off -->
+  <section>
+    <h2>7. Phase 4 Gate Sign-Off</h2>
+    <div class="card">
+      <div class="callout callout-success">
+        <strong>Sign-Off Decision: APPROVED FOR PHASE 4 MODULE 1</strong><br>
+        The database integrity guards, immutability triggers, advisory lock serialization, two-tier evaluation ledgers, credential hygiene rules, and authorization contracts are verified and certified. Phase 4 Module 1 implementation may begin.
+      </div>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>

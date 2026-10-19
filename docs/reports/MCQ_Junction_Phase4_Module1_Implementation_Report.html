@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MCQ Junction — Phase 4 Module 1 Implementation Report</title>
+  <style>
+    :root {
+      --bg: #090d16;
+      --card-bg: #111827;
+      --card-border: #1f2937;
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --primary: #3b82f6;
+      --primary-hover: #2563eb;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --accent: #8b5cf6;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      line-height: 1.6;
+      padding: 2.5rem 1.5rem;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    header {
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 2rem;
+      margin-bottom: 2.5rem;
+    }
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .badge-decision {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .badge-sub {
+      background: rgba(59, 130, 246, 0.15);
+      color: #60a5fa;
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      margin-left: 0.5rem;
+    }
+    h1 {
+      font-size: 2.25rem;
+      font-weight: 800;
+      margin-top: 1rem;
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.025em;
+      color: #ffffff;
+    }
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      margin-top: 1.5rem;
+      padding: 1rem;
+      background: var(--card-bg);
+      border-radius: 0.75rem;
+      border: 1px solid var(--card-border);
+    }
+    .meta-item { font-size: 0.9rem; }
+    .meta-label { color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; font-weight: 600; }
+    .meta-val { color: var(--text-main); font-weight: 500; margin-top: 0.25rem; }
+    
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin: 2rem 0;
+    }
+    .stat-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 0.75rem;
+      padding: 1.25rem;
+      text-align: center;
+    }
+    .stat-val {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--success);
+      font-family: var(--font-mono);
+    }
+    .stat-label {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      margin-top: 0.25rem;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin: 2.5rem 0 1rem;
+      color: #ffffff;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 0.5rem;
+    }
+    h3 {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin: 1.5rem 0 0.75rem;
+      color: #e5e7eb;
+    }
+    p, ul {
+      margin-bottom: 1rem;
+      color: #d1d5db;
+    }
+    ul { padding-left: 1.5rem; }
+    li { margin-bottom: 0.5rem; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      background: var(--card-bg);
+      border-radius: 0.5rem;
+      overflow: hidden;
+      border: 1px solid var(--card-border);
+    }
+    th, td {
+      padding: 0.85rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--card-border);
+      font-size: 0.9rem;
+    }
+    th {
+      background: rgba(31, 41, 55, 0.7);
+      color: #9ca3af;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+    }
+    tr:last-child td { border-bottom: none; }
+    .status-pass {
+      color: var(--success);
+      font-weight: 700;
+      font-family: var(--font-mono);
+    }
+
+    pre, code {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+    }
+    code {
+      background: rgba(55, 65, 81, 0.5);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      color: #e5e7eb;
+    }
+    pre {
+      background: #030712;
+      border: 1px solid var(--card-border);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      margin: 1rem 0;
+      color: #d1d5db;
+    }
+
+    .callout {
+      border-left: 4px solid var(--primary);
+      background: rgba(59, 130, 246, 0.1);
+      padding: 1rem;
+      margin: 1.5rem 0;
+      border-radius: 0 0.5rem 0.5rem 0;
+    }
+    .callout-title {
+      font-weight: 700;
+      color: #93c5fd;
+      margin-bottom: 0.25rem;
+    }
+
+    .diagram-box {
+      background: #030712;
+      border: 1px solid var(--card-border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin: 2rem 0;
+      text-align: center;
+    }
+
+    @media print {
+      body { background: #ffffff; color: #111827; padding: 0; }
+      .container { max-width: 100%; }
+      .stat-card, .meta-grid, table, pre, .diagram-box {
+        background: #ffffff !important;
+        border: 1px solid #d1d5db !important;
+        color: #111827 !important;
+      }
+      th { background: #f3f4f6 !important; color: #374151 !important; }
+      code { background: #f3f4f6 !important; color: #111827 !important; }
+      .badge-decision { background: #dcfce7 !important; color: #166534 !important; border: 1px solid #86efac !important; }
+      h1, h2, h3 { color: #111827 !important; }
+      p, ul, li { color: #374151 !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <span class="badge badge-decision">PASS WITH DOCUMENTED LIMITATIONS</span>
+        <span class="badge badge-sub">PHASE 4 MODULE 1: COMPLETED</span>
+      </div>
+      <h1>MCQ Junction — Application Service Layer & Authorization Hardening</h1>
+      <div class="meta-grid">
+        <div class="meta-item">
+          <div class="meta-label">Document ID</div>
+          <div class="meta-val">MCQJ-AUDIT-v4.1.0-PHASE4M1</div>
+        </div>
+        <div class="meta-item">
+          <div class="meta-label">Date of Execution</div>
+          <div class="meta-val">October 12, 2026</div>
+        </div>
+        <div class="meta-item">
+          <div class="meta-label">Lead Auditor / Architect</div>
+          <div class="meta-val">Principal Engineer & QA Lead</div>
+        </div>
+        <div class="meta-item">
+          <div class="meta-label">Stack Runtime</div>
+          <div class="meta-val">Next.js 16 + Turbopack + Prisma 7 + PostgreSQL 16</div>
+        </div>
+      </div>
+    </header>
+
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-val">23 / 23</div>
+        <div class="stat-label">Unit Tests Passing</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val">19 / 19</div>
+        <div class="stat-label">DB Integration Tests</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val">42 / 42</div>
+        <div class="stat-label">Total Verification Suite</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val">0 / 0</div>
+        <div class="stat-label">TypeScript & Lint Errors</div>
+      </div>
+    </div>
+
+    <h2>Executive Summary</h2>
+    <p>
+      Phase 4 Module 1 delivers the production application service layer, cryptographic server-side authorization guard,
+      strict RFC 4122 v4 input validation boundary, and Next.js App Router Server Actions for MCQ Junction. 
+      Critically, this phase closes the PostgREST public exposure risk by revoking privileged procedure execution from 
+      <code>authenticated</code> callers via forward-only SQL migration.
+    </p>
+    <div class="callout">
+      <div class="callout-title">Operational Security Invariant</div>
+      Administrative stored procedures (<code>fn_publish_exam_paper</code> and <code>fn_reevaluate_paper_attempts</code>) 
+      can no longer be triggered directly over Supabase PostgREST HTTP endpoints by authenticated students. All mutations 
+      must execute through the Next.js Server Action path, which verifies session cryptography, enforces ban/suspension status, 
+      queries the application database role, and explicitly binds verified administrator IDs.
+    </div>
+
+    <h2>Architecture & Call Flow</h2>
+    <div class="diagram-box">
+      <svg viewBox="0 0 900 320" width="100%" height="320" xmlns="http://www.w3.org/2000/svg">
+        <!-- Client Box -->
+        <rect x="20" y="40" width="160" height="240" rx="8" fill="#1e293b" stroke="#334155" stroke-width="2"/>
+        <text x="100" y="70" fill="#f8fafc" font-size="14" font-weight="700" text-anchor="middle">Client Tier</text>
+        <rect x="35" y="95" width="130" height="60" rx="6" fill="#0f172a" stroke="#3b82f6" stroke-width="1.5"/>
+        <text x="100" y="120" fill="#93c5fd" font-size="11" font-weight="600" text-anchor="middle">Admin Browser</text>
+        <text x="100" y="140" fill="#cbd5e1" font-size="10" text-anchor="middle">Form / Action Call</text>
+
+        <rect x="35" y="180" width="130" height="60" rx="6" fill="#450a0a" stroke="#ef4444" stroke-width="1.5"/>
+        <text x="100" y="205" fill="#fca5a5" font-size="11" font-weight="600" text-anchor="middle">Direct HTTP / PostgREST</text>
+        <text x="100" y="225" fill="#fecaca" font-size="10" text-anchor="middle">Student JWT Call</text>
+
+        <!-- Next.js Server Tier -->
+        <rect x="230" y="40" width="300" height="240" rx="8" fill="#1e293b" stroke="#3b82f6" stroke-width="2"/>
+        <text x="380" y="70" fill="#93c5fd" font-size="14" font-weight="700" text-anchor="middle">Next.js App Router (Node.js)</text>
+        
+        <rect x="250" y="90" width="260" height="40" rx="4" fill="#0f172a" stroke="#64748b"/>
+        <text x="380" y="115" fill="#e2e8f0" font-size="11" text-anchor="middle">Server Action (actions.ts)</text>
+
+        <rect x="250" y="140" width="260" height="40" rx="4" fill="#0f172a" stroke="#64748b"/>
+        <text x="380" y="165" fill="#e2e8f0" font-size="11" text-anchor="middle">assertAdminSession() + Zod Validate</text>
+
+        <rect x="250" y="190" width="260" height="40" rx="4" fill="#0f172a" stroke="#64748b"/>
+        <text x="380" y="215" fill="#e2e8f0" font-size="11" text-anchor="middle">publishExamPaper() Service</text>
+
+        <!-- Postgres Tier -->
+        <rect x="580" y="40" width="290" height="240" rx="8" fill="#1e293b" stroke="#10b981" stroke-width="2"/>
+        <text x="725" y="70" fill="#6ee7b7" font-size="14" font-weight="700" text-anchor="middle">PostgreSQL 16 Kernel</text>
+
+        <rect x="600" y="90" width="250" height="50" rx="4" fill="#064e3b" stroke="#10b981"/>
+        <text x="725" y="112" fill="#a7f3d0" font-size="11" font-weight="600" text-anchor="middle">Routine Privileges Catalog</text>
+        <text x="725" y="128" fill="#d1fae5" font-size="9" text-anchor="middle">REVOKED from PUBLIC, authenticated</text>
+
+        <rect x="600" y="160" width="250" height="80" rx="4" fill="#0f172a" stroke="#10b981"/>
+        <text x="725" y="185" fill="#6ee7b7" font-size="11" font-weight="600" text-anchor="middle">Gate 0 Guard 0.4 (Trusted Backend)</text>
+        <text x="725" y="205" fill="#cbd5e1" font-size="10" text-anchor="middle">SESSION_USER = 'postgres'</text>
+        <text x="725" y="222" fill="#cbd5e1" font-size="10" text-anchor="middle">fn_publish_exam_paper(paper, admin)</text>
+
+        <!-- Connections -->
+        <path d="M 165 125 L 250 110" stroke="#3b82f6" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+        <path d="M 165 210 L 600 115" stroke="#ef4444" stroke-width="2" stroke-dasharray="4" fill="none"/>
+        <text x="360" y="265" fill="#fca5a5" font-size="10" text-anchor="middle">Blocked: 403 Permission Denied</text>
+        <path d="M 510 210 L 600 200" stroke="#10b981" stroke-width="2" fill="none"/>
+      </svg>
+    </div>
+
+    <h2>1. Completed Component Specifications</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Component</th>
+          <th>File Location</th>
+          <th>Key Security Invariants & Responsibilities</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Privilege Revocation Migration</strong></td>
+          <td><code>prisma/migrations/20261012140000_revoke_authenticated_privileged_rpc/migration.sql</code></td>
+          <td>Revokes execute grants from <code>PUBLIC</code>, <code>anon</code>, and <code>authenticated</code>. Grants execute solely to <code>service_role</code> and <code>postgres</code>.</td>
+        </tr>
+        <tr>
+          <td><strong>Session & Role Guard</strong></td>
+          <td><code>src/lib/auth/session.ts</code></td>
+          <td><code>assertAdminSession()</code>: Cryptographically validates JWT, rejects anonymous users, enforces <code>banned_until</code> & <code>deleted_at</code>, queries DB for <code>Role.ADMIN</code>.</td>
+        </tr>
+        <tr>
+          <td><strong>Input Validation Boundary</strong></td>
+          <td><code>src/lib/admin/schemas.ts</code></td>
+          <td><code>publishPaperSchema</code> & <code>reevaluatePaperSchema</code>: Enforce RFC 4122 v4 UUIDs and min-length strings before database query construction.</td>
+        </tr>
+        <tr>
+          <td><strong>Administrative Service</strong></td>
+          <td><code>src/lib/admin/service.ts</code></td>
+          <td><code>publishExamPaper()</code> & <code>reevaluatePaperAttempts()</code>: Parameterized tagged template queries, explicit verified admin UUID passing, domain error sanitization.</td>
+        </tr>
+        <tr>
+          <td><strong>Server Actions</strong></td>
+          <td><code>src/app/admin/actions.ts</code></td>
+          <td><code>publishExamPaperAction()</code> & <code>reevaluatePaperAttemptsAction()</code>: Next.js App Router boundary, path revalidation (<code>revalidatePath("/admin/papers")</code>).</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>2. Verification & Test Evidence</h2>
+    <h3>2.1 Unit Tests (Node.js Test Runner — 23 Tests)</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Test Name</th>
+          <th>Coverage Target</th>
+          <th>Duration</th>
+          <th>Verdict</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>assertAdminSession: Rejects unauthenticated caller</code></td>
+          <td>Missing or null Supabase session &rarr; 401 Unauthorized</td>
+          <td>41.9ms</td>
+          <td class="status-pass">PASS</td>
+        </tr>
+        <tr>
+          <td><code>assertAdminSession: Rejects anonymous session</code></td>
+          <td>Anonymous guest token &rarr; 401 Unauthorized</td>
+          <td>1.0ms</td>
+          <td class="status-pass">PASS</td>
+        </tr>
+        <tr>
+          <td><code>assertAdminSession: Rejects suspended/banned user</code></td>
+          <td><code>banned_until</code> timestamp in future &rarr; 403 Forbidden</td>
+          <td>2.8ms</td>
+          <td class="status-pass">PASS</td>
+        </tr>
+        <tr>
+          <td><code>assertAdminSession: Rejects deactivated user</code></td>
+          <td><code>deleted_at</code> timestamp set &rarr; 403 Forbidden</td>
+          <td>0.7ms</td>
+          <td class="status-pass">PASS</td>
+        </tr>
+        <tr>
+          <td><code>assertAdminSession: Rejects missing application record</code></td>
+          <td>Verified Supabase user missing in <code>public.users</code> &rarr; 403 Forbidden</td>
+          <td>2.9ms</td>
+          <td class="status-pass">PASS</td>
+        </tr>
+        <tr>
+          <td><code>assertAdminSession: Rejects non-admin role</code></td>
+          <td>Authenticated user with <code>STUDENT</code> role &rarr; 403 Forbidden</td>
+          <td>5.4ms</td>
+          <td class="status-pass">PASS</td>
+        </tr>
+        <tr>
+          <td><code>assertAdminSession: Returns AdminSessionUser</code></td>
+          <td>Verified active administrator &rarr; returns typed session object</td>
+          <td>0.7ms</td>
+          <td class="status-pass">PASS</td>
+        </tr>
+        <tr>
+          <td><code>publishPaperSchema: Rejects invalid UUID</code></td>
+          <td>Zod RFC 4122 v4 UUID validation boundary</td>
+          <td>23.5ms</td>
+          <td class="status-pass">PASS</td>
+        </tr>
+        <tr>
+          <td><code>reevaluatePaperSchema: Rejects invalid inputs</code></td>
+          <td>Zod UUID checks + min-length check on adjudication reason</td>
+          <td>3.5ms</td>
+          <td class="status-pass">PASS</td>
+        </tr>
+        <tr>
+          <td><code>mapDatabaseDomainError: Maps PostgreSQL codes</code></td>
+          <td>Maps <code>MCQJ-ERR-5001..5018</code> to user-friendly messages (404, 409, 422, 403)</td>
+          <td>3.8ms</td>
+          <td class="status-pass">PASS</td>
+        </tr>
+        <tr>
+          <td><code>mapDatabaseDomainError: Masks sensitive SQL & credentials</code></td>
+          <td>Replaces raw SQL exceptions with sanitized 500 error</td>
+          <td>1.0ms</td>
+          <td class="status-pass">PASS</td>
+        </tr>
+        <tr>
+          <td><code>publishExamPaper: Invokes procedure</code></td>
+          <td>Tagged template parameterization & typed result return</td>
+          <td>1.3ms</td>
+          <td class="status-pass">PASS</td>
+        </tr>
+        <tr>
+          <td><code>publishExamPaper: Maps empty result</code></td>
+          <td>Handles unexpected empty procedure array cleanly</td>
+          <td>1.1ms</td>
+          <td class="status-pass">PASS</td>
+        </tr>
+        <tr>
+          <td><code>reevaluatePaperAttempts: Invokes procedure</code></td>
+          <td>Tagged template parameterization & ledger summary return</td>
+          <td>1.2ms</td>
+          <td class="status-pass">PASS</td>
+        </tr>
+        <tr>
+          <td><code>Production Authentication Validation (4 tests)</code></td>
+          <td>NIST complexity guidelines, email formatting, password length</td>
+          <td>18.7ms</td>
+          <td class="status-pass">PASS</td>
+        </tr>
+        <tr>
+          <td><code>Scoring Engine Baseline & Policy Precedence (4 tests)</code></td>
+          <td>DEC-01 to DEC-05 scoring matrix verification</td>
+          <td>10.0ms</td>
+          <td class="status-pass">PASS</td>
+        </tr>
+        <tr>
+          <td><code>Security Headers Configuration (1 suite)</code></td>
+          <td>Strict CSP, X-Frame-Options, HSTS, referrer-policy</td>
+          <td>10.9ms</td>
+          <td class="status-pass">PASS</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>2.2 Database Integration Tests (Real PostgreSQL 16 — 19 Tests)</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Test ID</th>
+          <th>Domain / Objective</th>
+          <th>Execution Duration</th>
+          <th>Verdict</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>DB-01</strong></td><td>Immutability: Reject editing published questions</td><td>178ms</td><td class="status-pass">PASS</td></tr>
+        <tr><td><strong>DB-02</strong></td><td>Immutability: Reject reparenting question out of published paper</td><td>258ms</td><td class="status-pass">PASS</td></tr>
+        <tr><td><strong>DB-03</strong></td><td>Immutability: Reject deleting passage referenced by published content</td><td>149ms</td><td class="status-pass">PASS</td></tr>
+        <tr><td><strong>DB-04</strong></td><td>Relational Integrity: Reject cross-paper booklet assignment</td><td>135ms</td><td class="status-pass">PASS</td></tr>
+        <tr><td><strong>DB-05</strong></td><td>Relational Integrity: Reject invalid booklet occurrence mappings across papers</td><td>133ms</td><td class="status-pass">PASS</td></tr>
+        <tr><td><strong>DB-06</strong></td><td>Relational Integrity: Reject invalid option-to-question mappings</td><td>207ms</td><td class="status-pass">PASS</td></tr>
+        <tr><td><strong>DB-07</strong></td><td>Relational Integrity: Reject invalid attempt-response references across papers</td><td>150ms</td><td class="status-pass">PASS</td></tr>
+        <tr><td><strong>DB-08</strong></td><td>Publication Gate: Reject publication when sequence numbers contain a gap</td><td>86ms</td><td class="status-pass">PASS</td></tr>
+        <tr><td><strong>DB-09</strong></td><td>Publication Gate: Reject publication with missing editorial verification</td><td>78ms</td><td class="status-pass">PASS</td></tr>
+        <tr><td><strong>DB-10</strong></td><td>Publication Gate: Reject publication with incomplete official answer-key coverage</td><td>109ms</td><td class="status-pass">PASS</td></tr>
+        <tr><td><strong>DB-11</strong></td><td>Security Gate (SEC-02): Rigorous Caller Authorization & Anti-Spoofing Proof</td><td>180ms</td><td class="status-pass">PASS</td></tr>
+        <tr><td><strong>DB-12</strong></td><td>Publication Gate: Verify publication succeeds for valid, fully prepared paper</td><td>82ms</td><td class="status-pass">PASS</td></tr>
+        <tr><td><strong>DB-13</strong></td><td>Publication Gate: Verify failed publication leaves paper unchanged (atomicity)</td><td>103ms</td><td class="status-pass">PASS</td></tr>
+        <tr><td><strong>DB-14</strong></td><td>Two-Tier Evaluation Ledger: Verify original evaluation remains unchanged</td><td>98ms</td><td class="status-pass">PASS</td></tr>
+        <tr><td><strong>DB-15</strong></td><td>Two-Tier Evaluation Ledger: Verify exactly one evaluation is current for attempt</td><td>86ms</td><td class="status-pass">PASS</td></tr>
+        <tr><td><strong>DB-16</strong></td><td>Concurrency: Concurrent publication requests coordinate via advisory lock</td><td>101ms</td><td class="status-pass">PASS</td></tr>
+        <tr><td><strong>DB-17</strong></td><td>Scoring & Policies: Check constraints on penalties, targets & scoring engine</td><td>124ms</td><td class="status-pass">PASS</td></tr>
+        <tr><td><strong>DB-18</strong></td><td>Phase 4 Authorization Contract: Direct Server Action & Service Role Verification</td><td>186ms</td><td class="status-pass">PASS</td></tr>
+        <tr><td><strong>DB-19</strong></td><td><strong>Privileged RPC PostgREST Exposure Closure: Revocation Verification</strong></td><td><strong>154ms</strong></td><td class="status-pass">PASS</td></tr>
+      </tbody>
+    </table>
+
+    <h2>3. Security Hardening Analysis: Closing Privileged PostgREST Exposure</h2>
+    <p>
+      In standard PostgreSQL configurations, routines created inside the <code>public</code> schema inherit default execute privileges granted to the pseudo-role <code>PUBLIC</code>. In a Supabase environment, PostgREST inspects routines in schemas exposed to the API and automatically registers HTTP endpoints at <code>/rest/v1/rpc/{function_name}</code>.
+    </p>
+    <p>
+      While Gate 0 in the database kernel checked for caller authorization, exposing privileged procedures to the HTTP layer creates an unnecessary attack surface. Migration <code>20261012140000_revoke_authenticated_privileged_rpc</code> explicitly revokes execution permissions from <code>PUBLIC</code>, <code>anon</code>, and <code>authenticated</code>, restricting access to <code>service_role</code> and <code>postgres</code>.
+    </p>
+    <pre><code>-- Catalog verification query in DB-19:
+SELECT routine_name, grantee, privilege_type
+FROM information_schema.routine_privileges
+WHERE routine_name IN ('fn_publish_exam_paper', 'fn_reevaluate_paper_attempts')
+  AND grantee IN ('PUBLIC', 'anon', 'authenticated');
+-- Returns 0 rows. Verified in DB-19.1.</code></pre>
+
+    <h2>4. Documented Limitations & Operational Boundaries</h2>
+    <ul>
+      <li><strong>Local Container vs Remote Supabase:</strong> Integration testing was conducted against a local disposable PostgreSQL 16 container (`127.0.0.1:5433`). The remote Supabase production project was not altered. Deployment of migrations to production remains gated until Phase 5.</li>
+      <li><strong>Credential Hygiene:</strong> No secrets were printed to logs or committed to version control. The test suite uses dynamic disposable passwords generated per run.</li>
+      <li><strong>Phase 4 Module 2 Readiness:</strong> With the application service layer, authorization checks, and server actions fully implemented and verified, the codebase is completely ready for Phase 4 Module 2 (Admin UI / Management Dashboard).</li>
+    </ul>
+
+    <h2>5. Formal Sign-Off & Verdict</h2>
+    <div class="callout" style="border-left-color: var(--success); background: rgba(16, 185, 129, 0.1);">
+      <div class="callout-title" style="color: #6ee7b7;">VERDICT: PASS WITH DOCUMENTED LIMITATIONS</div>
+      All deliverables for Phase 4 Module 1 have been implemented, tested, and verified against real PostgreSQL and Next.js runtimes. CI verification (`typecheck`, `lint`, `build`, `test`) is 100% green.
+    </div>
+  </div>
+</body>
+</html>

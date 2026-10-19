@@ -1,0 +1,111 @@
+{
+  "audit_version": "8.1.0",
+  "phase": "Phase 8.1: All-or-Nothing Scoring, Comprehension Questions & PostgreSQL Verification",
+  "audit_date": "2026-10-16",
+  "status": "PASS",
+  "summary": {
+    "total_findings": 3,
+    "resolved": 3,
+    "unresolved": 0,
+    "critical": 0,
+    "high": 0,
+    "medium": 1,
+    "low": 2,
+    "informational": 0
+  },
+  "metrics": {
+    "question_types_supported": [
+      "SINGLE_CORRECT",
+      "MULTIPLE_CORRECT",
+      "ASSERTION_REASON",
+      "COMPREHENSION_CHILD",
+      "SINGLE_CHOICE (legacy alias)",
+      "MULTIPLE_CHOICE (legacy alias)"
+    ],
+    "languages_supported": [
+      "EN (English - LTR)",
+      "HI (Hindi - Devanagari Unicode)",
+      "UR (Urdu - Nastaliq/Perso-Arabic RTL with isolated LTR options)",
+      "BN (Bangla - Bengali Unicode)",
+      "TA (Tamil)",
+      "TE (Telugu)"
+    ],
+    "all_or_nothing_scoring_matrix": {
+      "exact_match_B_D": "Award full positive marks (+3.0)",
+      "partial_subset_B": "Award zero positive marks; deduct negative penalty (-1.0)",
+      "partial_subset_D": "Award zero positive marks; deduct negative penalty (-1.0)",
+      "extra_wrong_A_B_D": "Award zero positive marks; deduct negative penalty (-1.0)",
+      "isolated_wrong_A": "Award zero positive marks; deduct negative penalty (-1.0)",
+      "unanswered": "Award 0.0 marks; zero penalty (0.0)",
+      "duplicate_inputs_B_B_D_D": "Normalized to set {B, D}; Award full positive marks (+3.0)",
+      "zero_penalty_config": "Award 0.0 marks on wrong selection when negative penalty is 0.0",
+      "partial_credit_permitted": "FALSE (Strict all-or-nothing across exam & learning)"
+    },
+    "automated_tests": {
+      "total_tests": 152,
+      "passed": 152,
+      "failed": 0,
+      "breakdown": {
+        "unit_and_scoring_suites": 107,
+        "database_integration_suite": 19,
+        "e2e_workflows_suite": 10,
+        "passage_database_suite": 7,
+        "security_isolation_suite": 9
+      }
+    },
+    "static_analysis": {
+      "typescript_errors": 0,
+      "eslint_errors": 0,
+      "eslint_warnings": 0,
+      "next_production_build": "SUCCESS (15 App Router routes compiled cleanly with Turbopack and Partial Prerendering)"
+    },
+    "database_verification": {
+      "docker_container": "mcqj-postgres-test",
+      "engine_version": "PostgreSQL 16.11",
+      "endpoint": "127.0.0.1:5433/mcq_junction_test",
+      "migrations_applied": 9,
+      "remote_database_mutations": 0,
+      "isolation_safety": "FAIL-CLOSED"
+    }
+  },
+  "findings": [
+    {
+      "finding_id": "PHASE8-1-DEFECT-01",
+      "title": "Passage Database Column Mapping Discrepancy",
+      "severity": "MEDIUM",
+      "category": "RELATIONAL_SCHEMA_ALIGNMENT",
+      "description": "Integration test queries initially referenced ref_code and language instead of the Prisma schema and Migration 5 columns passage_ref_code and language_code, causing column does not exist errors during live PostgreSQL container execution.",
+      "resolution": "Updated test queries and server-side mapping to align strictly with passage_ref_code and language_code. All 7 passage database integration tests pass green.",
+      "status": "RESOLVED"
+    },
+    {
+      "finding_id": "PHASE8-1-DEFECT-02",
+      "title": "React 19 Cascading Render and Ref Mutation in LearningQuestionCard",
+      "severity": "LOW",
+      "category": "FRONTEND_REACT_CONVENTIONS",
+      "description": "LearningQuestionCard utilized useEffect with setState and mutated isFinalizedRef during render to synchronize state upon question navigation, violating React 19 / eslint-plugin-react-hooks rules.",
+      "resolution": "Refactored state synchronization to the official React render-time pattern using prevOccurrenceId comparison and eliminated mutable ref manipulation. ESLint passed with 0 errors and 0 warnings.",
+      "status": "RESOLVED"
+    },
+    {
+      "finding_id": "PHASE8-1-DEFECT-03",
+      "title": "Missing COMPREHENSION_CHILD in EvaluatedQuestionType",
+      "severity": "LOW",
+      "category": "TYPE_SAFETY",
+      "description": "EvaluatedQuestionType in evaluation.ts was restricted to SINGLE_CORRECT, MULTIPLE_CORRECT, and ASSERTION_REASON, causing TypeScript compiler errors when rendering passage-linked questions.",
+      "resolution": "Extended EvaluatedQuestionType with COMPREHENSION_CHILD and enhanced normalizeQuestionType to inspect options (evaluating as multiple-correct if >1 correct option configured, or single-correct otherwise). tsc --noEmit passed with 0 errors.",
+      "status": "RESOLVED"
+    }
+  ],
+  "gates_enforced": [
+    "Gate 1: Minimum 2 options per question",
+    "Gate 2: Unique option labels per question",
+    "Gate 3: Explicit question type stored (no inference)",
+    "Gate 4: Single-correct requires exactly 1 correct option",
+    "Gate 5: Multiple-correct requires at least 1 correct option and enforces strict all-or-nothing scoring",
+    "Gate 6: Assertion-reason requires non-empty assertion and reason text with exactly 1 correct choice",
+    "Gate 7: COMPREHENSION_CHILD requires mandatory linked passage (passage_id / passage_ref_code)",
+    "Gate 8: Immutability triggers block modifying or deleting passages and questions once paper is PUBLISHED",
+    "Gate 9: Local disposable test database isolation (127.0.0.1:5433) with zero remote mutations"
+  ]
+}

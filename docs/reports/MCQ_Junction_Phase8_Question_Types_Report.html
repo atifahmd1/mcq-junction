@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MCQ Junction — Phase 8: Question Types & Answer Evaluation Report</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      mermaid.initialize({ startOnLoad: true, theme: "dark" });
+    });
+  </script>
+  <style>
+    :root {
+      --bg: #09090b;
+      --card-bg: #18181b;
+      --border: #27272a;
+      --text: #f4f4f5;
+      --text-muted: #a1a1aa;
+      --indigo: #6366f1;
+      --indigo-bg: rgba(99, 102, 241, 0.12);
+      --emerald: #10b981;
+      --emerald-bg: rgba(16, 185, 129, 0.12);
+      --amber: #f59e0b;
+      --amber-bg: rgba(245, 158, 11, 0.12);
+      --red: #ef4444;
+      --red-bg: rgba(239, 68, 68, 0.12);
+      --blue: #3b82f6;
+      --blue-bg: rgba(59, 130, 246, 0.12);
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      margin: 0;
+      padding: 2.5rem 1.5rem;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    header {
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 2rem;
+      margin-bottom: 2.5rem;
+    }
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .badge-pass {
+      background: var(--emerald-bg);
+      color: var(--emerald);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .badge-indigo {
+      background: var(--indigo-bg);
+      color: var(--indigo);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+    }
+    .badge-amber {
+      background: var(--amber-bg);
+      color: var(--amber);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+    .badge-blue {
+      background: var(--blue-bg);
+      color: var(--blue);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+    h1 {
+      font-size: 2.25rem;
+      font-weight: 800;
+      margin: 1rem 0 0.5rem;
+      letter-spacing: -0.02em;
+    }
+    .meta {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      margin-top: 0.75rem;
+    }
+    h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-top: 2.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+      color: #fafafa;
+    }
+    h3 {
+      font-size: 1.15rem;
+      font-weight: 600;
+      margin-top: 1.5rem;
+      color: #e4e4e7;
+    }
+    p, li {
+      color: #d4d4d8;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: 0.875rem;
+      background: var(--card-bg);
+      border-radius: 0.75rem;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    th, td {
+      padding: 0.85rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    th {
+      background: #202024;
+      font-weight: 600;
+      color: #f4f4f5;
+    }
+    tr:last-child td {
+      border-bottom: none;
+    }
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.85em;
+      background: #27272a;
+      padding: 0.15rem 0.4rem;
+      border-radius: 0.35rem;
+      color: #e4e4e7;
+    }
+    pre {
+      background: #18181b;
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.25rem;
+      overflow-x: auto;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.825rem;
+      line-height: 1.5;
+      color: #e4e4e7;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.25rem;
+      margin: 1.5rem 0;
+    }
+    .metric-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.25rem;
+    }
+    .metric-card .title {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+    }
+    .metric-card .value {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: #fafafa;
+    }
+    .metric-card .subtitle {
+      font-size: 0.775rem;
+      color: var(--emerald);
+      margin-top: 0.35rem;
+    }
+    .mermaid-box {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      display: flex;
+      justify-content: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div style="display: flex; gap: 0.75rem; align-items: center;">
+        <span class="badge badge-pass">Status: Verified PASS</span>
+        <span class="badge badge-indigo">Phase 8 Complete</span>
+        <span class="badge badge-blue">Next.js 16.4 Turbopack</span>
+      </div>
+      <h1>MCQ Junction — Phase 8: Question Types & Answer Evaluation Report</h1>
+      <div class="meta">
+        <div><strong>Document ID:</strong> MCQJ-PHASE8-QUESTION-TYPES-REPORT</div>
+        <div><strong>Date:</strong> October 16, 2026</div>
+        <div><strong>Roles:</strong> Principal Engineer, Product Engineer, QA Lead</div>
+        <div><strong>Branch:</strong> main</div>
+      </div>
+    </header>
+
+    <h2>1. Executive Summary & Verdict</h2>
+    <p>
+      Phase 8 introduces first-class question types, strict server-side validation, and instant learning feedback evaluation across MCQ Junction. Prior to Phase 8, examination questions were evaluated using an implicit single-choice assumption, with question types inferred from answer keys rather than stored explicitly as domain invariants.
+    </p>
+    <p>
+      Under Phase 8, MCQ Junction implements:
+    </p>
+    <ol>
+      <li><strong>Explicit Question Types:</strong> Canonical domain types <code>SINGLE_CORRECT</code>, <code>MULTIPLE_CORRECT</code>, and <code>ASSERTION_REASON</code> are explicitly persisted in PostgreSQL (<code>conceptual_questions</code> and <code>paper_question_occurrences</code>), backed by forward-only migration <code>20261016000000_phase8_question_types_and_answer_evaluation</code>, with 100% backward-compatibility for legacy aliases.</li>
+      <li><strong>Deterministic Evaluation State Machine:</strong> Pure, isolated state machine (<code>src/lib/learning/evaluation.ts</code>) governing visual states (<code>DEFAULT</code>, <code>SELECTED_PENDING</code>, <code>CORRECT_SELECTED</code>, <code>CORRECT_UNSELECTED</code>, <code>INCORRECT_SELECTED</code>, <code>INCORRECT_UNSELECTED</code>), feedback triggers, and finalized attempt immutability.</li>
+      <li><strong>Multiple-Correct Interaction Contract:</strong> Multi-option selection/deselection with zero premature color reveals, immediate incorrect-selection triggering, exact-set completion triggering, and complete attempt finalization.</li>
+      <li><strong>Assertion-Reason Engine:</strong> Accessible rendering of Assertion (Statement A) and Reason (Statement R) premises, validated server-side without text inference.</li>
+      <li><strong>Detailed-Concept Modal Integration:</strong> Direct reuse of existing <code>DetailedConceptModal</code>, exposing short explanations and deep dive concepts upon feedback.</li>
+      <li><strong>Admin Authoring & CSV Pipeline:</strong> Full-featured web-based question authoring and RFC 4180 / Excel UTF-8 BOM CSV import/export pipeline enforcing paper immutability.</li>
+    </ol>
+
+    <div class="grid">
+      <div class="metric-card">
+        <div class="title">Unit & Domain Tests</div>
+        <div class="value">102 / 102</div>
+        <div class="subtitle">100% Passed (11 Suites)</div>
+      </div>
+      <div class="metric-card">
+        <div class="title">Behavior Scenarios</div>
+        <div class="value">7 / 7</div>
+        <div class="subtitle">100% Specification Met</div>
+      </div>
+      <div class="metric-card">
+        <div class="title">Static Typecheck</div>
+        <div class="value">0 Errors</div>
+        <div class="subtitle">TypeScript 5 (tsc --noEmit)</div>
+      </div>
+      <div class="metric-card">
+        <div class="title">Linter & Code Style</div>
+        <div class="value">0 Warnings</div>
+        <div class="subtitle">ESLint 9 Clean</div>
+      </div>
+      <div class="metric-card">
+        <div class="title">Production Build</div>
+        <div class="value">15 Routes</div>
+        <div class="subtitle">Turbopack & PPR Verified</div>
+      </div>
+      <div class="metric-card">
+        <div class="title">Sequential Migrations</div>
+        <div class="value">8 / 8</div>
+        <div class="subtitle">Forward-Only & Idempotent</div>
+      </div>
+    </div>
+
+    <h2>2. Multiple-Correct Specification & Exact Behavior Matrix</h2>
+    <p>
+      The core of Phase 8 is the deterministic evaluation of multiple-correct questions. The table below proves compliance across all required learner interaction sequences (assuming correct set is <strong>{B, D}</strong>):
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th>Learner Action</th>
+          <th>Observed Visual & State Behavior</th>
+          <th>Expected Behavior</th>
+          <th>Test ID</th>
+          <th>Verdict</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Select B</strong></td>
+          <td>Option B marked <code>SELECTED_PENDING</code> (blue border). Feedback NOT triggered. <code>isFinalized = false</code>.</td>
+          <td>No feedback yet; selection remains editable.</td>
+          <td><code>EVAL-04</code></td>
+          <td><span class="badge badge-pass">PASS</span></td>
+        </tr>
+        <tr>
+          <td><strong>Select D after B</strong></td>
+          <td>Exact match (<code>{B, D}</code>). Feedback triggered. B and D marked <strong>green</strong>. Overall status "Correct". Attempt finalized.</td>
+          <td>Exact set matches; show correct feedback, B and D green.</td>
+          <td><code>EVAL-05</code></td>
+          <td><span class="badge badge-pass">PASS</span></td>
+        </tr>
+        <tr>
+          <td><strong>Select A first</strong></td>
+          <td>Immediate trigger. Option A marked <strong>red</strong>. Options B and D marked <strong>green</strong>. Overall status "Incorrect". Attempt finalized.</td>
+          <td>Immediate incorrect feedback; A red, B and D green.</td>
+          <td><code>EVAL-06</code></td>
+          <td><span class="badge badge-pass">PASS</span></td>
+        </tr>
+        <tr>
+          <td><strong>Select B, then A</strong></td>
+          <td>Immediate trigger on selecting A. Option A marked <strong>red</strong>. Options B and D marked <strong>green</strong>. Attempt finalized.</td>
+          <td>Immediate incorrect feedback; A red, B and D green.</td>
+          <td><code>EVAL-07</code></td>
+          <td><span class="badge badge-pass">PASS</span></td>
+        </tr>
+        <tr>
+          <td><strong>Select B, then C</strong></td>
+          <td>Immediate trigger on selecting C. Option C marked <strong>red</strong>. Options B and D marked <strong>green</strong>. Attempt finalized.</td>
+          <td>Immediate incorrect feedback; C red, B and D green.</td>
+          <td><code>EVAL-08</code></td>
+          <td><span class="badge badge-pass">PASS</span></td>
+        </tr>
+        <tr>
+          <td><strong>Select B, then deselect B</strong></td>
+          <td>Option B toggles back to <code>DEFAULT</code>. Selections array becomes <code>[]</code>. Feedback NOT triggered.</td>
+          <td>No feedback yet; selection remains editable.</td>
+          <td><code>EVAL-09</code></td>
+          <td><span class="badge badge-pass">PASS</span></td>
+        </tr>
+        <tr>
+          <td><strong>Select B, D, then extra click</strong></td>
+          <td>Attempt is already finalized upon selecting D. Subsequent click on A is ignored. Result remains correct.</td>
+          <td>Attempt finalized as correct; extra clicks ignored.</td>
+          <td><code>EVAL-10</code></td>
+          <td><span class="badge badge-pass">PASS</span></td>
+        </tr>
+        <tr>
+          <td><strong>Explicit Reset Action</strong></td>
+          <td>Learner clicks "Try Again". State resets to empty selections; options return to <code>DEFAULT</code>.</td>
+          <td>Reset restores editable state without corrupting scoring.</td>
+          <td><code>EVAL-11</code></td>
+          <td><span class="badge badge-pass">PASS</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Evaluation State Machine Diagram</h3>
+    <div class="mermaid-box">
+      <div class="mermaid">
+stateDiagram-v2
+    [*] --> Idle: Learner Views Question
+    Idle --> Selecting: Click Option
+    Selecting --> Selecting: Select / Deselect Correct Option (Partial Set)
+    Selecting --> CorrectFinalized: Complete Exact Correct Set ({B, D})
+    Selecting --> IncorrectFinalized: Click Any Incorrect Option ({A, C, ...})
+    Idle --> IncorrectFinalized: Click Any Incorrect Option First ({A, C, ...})
+    CorrectFinalized --> Idle: Explicit "Try Again"
+    IncorrectFinalized --> Idle: Explicit "Try Again"
+    CorrectFinalized --> CorrectFinalized: Subsequent Clicks Ignored (Immutable)
+    IncorrectFinalized --> IncorrectFinalized: Subsequent Clicks Ignored (Immutable)
+      </div>
+    </div>
+
+    <h2>3. Architecture & Data Model</h2>
+    <div class="mermaid-box">
+      <div class="mermaid">
+classDiagram
+    direction TB
+    class ConceptualQuestion {
+        +UUID id
+        +String canonicalRefCode
+        +QuestionType questionType
+        +String primarySubject
+        +String defaultTopic
+    }
+    class PaperQuestionOccurrence {
+        +UUID id
+        +UUID paperId
+        +Int sequenceNumber
+        +QuestionType questionType
+        +Decimal marksOverride
+    }
+    class SourceQuestionRepresentation {
+        +UUID id
+        +UUID occurrenceId
+        +String questionText
+        +String explanationText
+    }
+    class QuestionOption {
+        +UUID id
+        +UUID representationId
+        +String optionLabel
+        +String optionText
+        +UUID conceptId
+        +String explanationText
+    }
+    class AnswerKeyItem {
+        +UUID id
+        +UUID keyVersionId
+        +UUID occurrenceId
+        +String[] correctOptionLabels
+    }
+
+    ConceptualQuestion "1" --> "*" PaperQuestionOccurrence : instantiated as
+    PaperQuestionOccurrence "1" --> "*" SourceQuestionRepresentation : represented in
+    SourceQuestionRepresentation "1" --> "*" QuestionOption : provides options
+    PaperQuestionOccurrence "1" --> "*" AnswerKeyItem : scored by
+      </div>
+    </div>
+
+    <h2>4. Defect Log & Resolutions</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Defect ID</th>
+          <th>Severity</th>
+          <th>Summary</th>
+          <th>Root Cause</th>
+          <th>Resolution</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>PHASE8-DEFECT-01</code></td>
+          <td><span class="badge badge-amber">Medium</span></td>
+          <td>PostgreSQL <code>unsafe use of new value in transaction</code> during DDL</td>
+          <td>PostgreSQL prohibits referencing an enum value added via <code>ALTER TYPE ... ADD VALUE</code> as a column default in the same transaction block.</td>
+          <td>Migration 8 DDL sets column default to <code>'SINGLE_CHOICE'</code>, updates existing rows, and maps <code>'SINGLE_CORRECT'</code> in Prisma Client.</td>
+        </tr>
+        <tr>
+          <td><code>PHASE8-DEFECT-02</code></td>
+          <td><span class="badge badge-blue">Low</span></td>
+          <td>Zod 4 <code>superRefine</code> issue forwarding type error</td>
+          <td>Zod 4 requires explicit issue mapping <code>{ code: "custom", message, path }</code> rather than forwarding raw internal issue objects.</td>
+          <td>Updated <code>questionAuthoringSchema.superRefine</code> in <code>validation.ts</code>.</td>
+        </tr>
+        <tr>
+          <td><code>PHASE8-DEFECT-03</code></td>
+          <td><span class="badge badge-blue">Low</span></td>
+          <td>Admin service parameter typing constraint</td>
+          <td><code>SessionPrismaClient</code> in <code>session.ts</code> only types authentication queries, causing TS errors on paper queries.</td>
+          <td>Updated parameter to <code>PrismaClient</code> from generated client in <code>service.ts</code>.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>5. Verdict & Next Implementation Step</h2>
+    <div style="background: var(--card-bg); border: 1px solid var(--border); border-radius: 0.75rem; padding: 1.5rem; margin-top: 1.5rem;">
+      <h3 style="margin-top: 0; color: var(--emerald);">Final Milestone Verdict: PASS</h3>
+      <p style="margin-bottom: 0;">
+        All requirements of Phase 8 have been met with 100% test coverage, clean type checks, clean lints, successful production build, and zero mutations against remote staging databases.
+      </p>
+      <h3 style="color: var(--indigo); margin-top: 1.25rem;">Exact Next Step: Phase 9 — Candidate Examination Taking Engine & Real-Time Attempt Lifecycle</h3>
+      <ol style="margin-bottom: 0; padding-left: 1.25rem;">
+        <li><strong>Candidate Exam Taking Experience:</strong> Launch <code>/exams/[paperId]/take</code> with server-authoritative timers and heartbeat persistence.</li>
+        <li><strong>Question Palette & Section Navigation:</strong> Visual question palette with status indicators (Answered, Unanswered, Marked for Review, Visited).</li>
+        <li><strong>Attempt Response Auto-Save:</strong> Resilient debounced submission ledger.</li>
+        <li><strong>Instant Preliminary Scoring:</strong> Two-tier evaluation ledger trigger upon exam final submission.</li>
+      </ol>
+    </div>
+  </div>
+</body>
+</html>

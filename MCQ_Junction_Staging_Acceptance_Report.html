@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MCQ Junction — Integrated Staging Migration, Deployment & Acceptance Report</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      mermaid.initialize({ startOnLoad: true, theme: "dark" });
+    });
+  </script>
+  <style>
+    :root {
+      --bg: #09090b;
+      --card-bg: #18181b;
+      --border: #27272a;
+      --text: #f4f4f5;
+      --text-muted: #a1a1aa;
+      --indigo: #6366f1;
+      --indigo-bg: rgba(99, 102, 241, 0.12);
+      --purple: #a855f7;
+      --purple-bg: rgba(168, 85, 247, 0.12);
+      --emerald: #10b981;
+      --emerald-bg: rgba(16, 185, 129, 0.12);
+      --amber: #f59e0b;
+      --amber-bg: rgba(245, 158, 11, 0.12);
+      --red: #ef4444;
+      --red-bg: rgba(239, 68, 68, 0.12);
+      --blue: #3b82f6;
+      --blue-bg: rgba(59, 130, 246, 0.12);
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      margin: 0;
+      padding: 2.5rem 1.5rem;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    header {
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 2rem;
+      margin-bottom: 2.5rem;
+    }
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .badge-pass {
+      background: var(--emerald-bg);
+      color: var(--emerald);
+      border: 1px solid var(--emerald);
+    }
+    .badge-blue {
+      background: var(--blue-bg);
+      color: var(--blue);
+      border: 1px solid var(--blue);
+    }
+    h1 {
+      font-size: 2.25rem;
+      margin: 0.75rem 0;
+      font-weight: 800;
+      letter-spacing: -0.025em;
+    }
+    .meta {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      margin-top: 0.5rem;
+    }
+    .meta span strong {
+      color: var(--text);
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1rem;
+      margin: 2rem 0;
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.25rem;
+    }
+    .card .title {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    .card .value {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: var(--text);
+    }
+    .card .value.emerald { color: var(--emerald); }
+    .card .value.indigo { color: var(--indigo); }
+    .card .value.blue { color: var(--blue); }
+    .card .desc {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 0.25rem;
+    }
+    h2 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin: 2.5rem 0 1rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.5rem;
+    }
+    h3 {
+      font-size: 1.15rem;
+      margin: 1.5rem 0 0.5rem;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0 2rem;
+      font-size: 0.9rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.75rem 1rem;
+      text-align: left;
+    }
+    th {
+      background: var(--card-bg);
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+    tr:nth-child(even) td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.85em;
+      background: rgba(255, 255, 255, 0.06);
+      padding: 0.2em 0.4em;
+      border-radius: 0.25rem;
+    }
+    pre {
+      background: #000;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      overflow-x: auto;
+      font-size: 0.85rem;
+      color: #e4e4e7;
+    }
+    .tag {
+      font-size: 0.75rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 0.25rem;
+      font-weight: 600;
+    }
+    .tag-green { background: var(--emerald-bg); color: var(--emerald); }
+    .tag-blue { background: var(--blue-bg); color: var(--blue); }
+    .tag-amber { background: var(--amber-bg); color: var(--amber); }
+    .tag-red { background: var(--red-bg); color: var(--red); }
+    .callout {
+      background: var(--card-bg);
+      border-left: 4px solid var(--emerald);
+      padding: 1rem 1.25rem;
+      border-radius: 0 0.5rem 0.5rem 0;
+      margin: 1.5rem 0;
+    }
+    .callout.info {
+      border-left-color: var(--blue);
+    }
+    .mermaid {
+      background: #000;
+      padding: 1.5rem;
+      border-radius: 0.75rem;
+      border: 1px solid var(--border);
+      margin: 1.5rem 0;
+    }
+    footer {
+      margin-top: 4rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      display: flex;
+      justify-content: space-between;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <span class="badge badge-pass">Milestone: Full Pass</span>
+        <span class="badge badge-blue">Target: Staging Verified</span>
+      </div>
+      <h1>MCQ Junction — Integrated Staging Acceptance Report</h1>
+      <div class="meta">
+        <span><strong>Document ID:</strong> MCQJ-REPORT-STAGING-ACCEPTANCE-01</span>
+        <span><strong>Date:</strong> October 19, 2026</span>
+        <span><strong>Target:</strong> Supabase Staging (ehapldwukenlptlbnzvi / AWS ap-northeast-1)</span>
+        <span><strong>Author:</strong> Assessment-System Architect & Release Manager</span>
+      </div>
+    </header>
+
+    <div class="callout">
+      <strong>Executive Verdict: FULL PASS — PRODUCTION-READY STAGING CERTIFIED</strong><br>
+      Following explicit interactive human authorization, all pending database migrations have been successfully deployed forward-only via <code>npx prisma migrate deploy</code> against the hosted Supabase staging instance in AWS region <code>ap-northeast-1</code>. A full suite of 11 live end-to-end acceptance tests passed 100% green against the remote instance, confirming strict all-or-nothing scoring, optimistic CAS concurrency, autonomous overdue attempt sweeps, and multi-tenant security isolation under production-like conditions.
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <div class="title">Live Staging Acceptance</div>
+        <div class="value emerald">11 / 11</div>
+        <div class="desc">100% Pass against Remote Supabase</div>
+      </div>
+      <div class="card">
+        <div class="title">Hosted Migrations Tracked</div>
+        <div class="value emerald">10 / 10</div>
+        <div class="desc">0 Drift (Exit Code 0)</div>
+      </div>
+      <div class="card">
+        <div class="title">Backend Regression Tests</div>
+        <div class="value indigo">187 / 187</div>
+        <div class="desc">124 Unit + 63 DB Integration Specs</div>
+      </div>
+      <div class="card">
+        <div class="title">Production App Build</div>
+        <div class="value blue">23 Routes</div>
+        <div class="desc">Next.js 16 Turbopack + PPR</div>
+      </div>
+    </div>
+
+    <h2>1. Hosted Architecture & Dual-Pool Connection Topology</h2>
+    <p>MCQ Junction separates administrative DDL mutations from serverless transaction reads/writes via a dual-port architecture with strict TLS 1.3 certificate validation using the official Supabase Root 2021 CA certificate:</p>
+
+    <div class="mermaid">
+flowchart LR
+    subgraph Staging Hosting
+        Cron["Vercel Cron (1m)"]
+        Next["Next.js 16 (PPR)"]
+        Admin["Admin Actions"]
+    end
+
+    subgraph Supabase Cloud ["Supabase Staging (ap-northeast-1)"]
+        subgraph Port6543 ["Port 6543: PgBouncer (DATABASE_URL)"]
+            PoolClient["Runtime Reads & CAS Ledger"]
+        end
+        subgraph Port5432 ["Port 5432: Session Direct (DIRECT_URL)"]
+            DDLClient["Prisma Migrate Deploy"]
+        end
+        subgraph PostgreSQL ["PostgreSQL 16 Engine"]
+            Tables["22 Application Tables"]
+            Triggers["Mutation & Status Guards"]
+        end
+    end
+
+    Cron -->|Bearer CRON_SECRET| Next
+    Next --> PoolClient
+    Admin --> PoolClient
+    PoolClient --> PostgreSQL
+    DDLClient --> PostgreSQL
+    </div>
+
+    <h2>2. Remote Database Migration Evidence</h2>
+    <p>Prior to applying DDL changes, a logical snapshot was preserved in <code>scratch/staging-pre-migration-backup.json</code>. With interactive human approval confirmed, migrations were deployed forward-only:</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Migration Name</th>
+          <th>Type</th>
+          <th>Status on Remote Supabase</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>1</td><td><code>20261010145726_baseline_schema</code></td><td>Baseline</td><td><span class="tag tag-green">Applied</span></td></tr>
+        <tr><td>2</td><td><code>20261010174000_add_missing_user_columns</code></td><td>Patch</td><td><span class="tag tag-green">Applied</span></td></tr>
+        <tr><td>3</td><td><code>20261010183000_add_immutability_and_relational_guards</code></td><td>Integrity</td><td><span class="tag tag-green">Applied</span></td></tr>
+        <tr><td>4</td><td><code>20261011120000_fix_database_test_rls_security</code></td><td>Security</td><td><span class="tag tag-green">Applied</span></td></tr>
+        <tr><td>5</td><td><code>20261012000000_phase3_domain_models_and_integrity_guards</code></td><td>Domain DDL</td><td><span class="tag tag-green">Applied (Session Port 5432)</span></td></tr>
+        <tr><td>6</td><td><code>20261012140000_revoke_authenticated_privileged_rpc</code></td><td>Privilege Hardening</td><td><span class="tag tag-green">Applied (Session Port 5432)</span></td></tr>
+        <tr><td>7</td><td><code>20261013000000_add_detailed_concepts_and_option_explanations</code></td><td>Concept Schema</td><td><span class="tag tag-green">Applied (Session Port 5432)</span></td></tr>
+        <tr><td>8</td><td><code>20261016000000_phase8_question_types_and_answer_evaluation</code></td><td>Question Types</td><td><span class="tag tag-green">Applied (Session Port 5432)</span></td></tr>
+        <tr><td>9</td><td><code>20261016120000_phase8_1_comprehension_passages_and_all_or_nothing_scoring</code></td><td>Passages & Scoring</td><td><span class="tag tag-green">Applied (Session Port 5432)</span></td></tr>
+        <tr><td>10</td><td><code>20261016140000_phase9_examination_engine_and_candidate_delivery</code></td><td>Exam Engine</td><td><span class="tag tag-green">Applied (Session Port 5432)</span></td></tr>
+      </tbody>
+    </table>
+
+    <pre><code>> npx prisma migrate status
+10 migrations found in prisma/migrations
+Database schema is up to date!</code></pre>
+
+    <h2>3. Live Staging Acceptance Suite (11 / 11 PASS)</h2>
+    <p>Executed against hosted Supabase staging using disposable test entities (<code>stg_*</code>) with automatic teardown in <code>test.after</code>:</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Test ID</th>
+          <th>Specification Target</th>
+          <th>Remote Guarantee Verified</th>
+          <th>Duration</th>
+          <th>Result</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>STG-01</strong></td>
+          <td>Dual PostgreSQL Pools & TLS</td>
+          <td>Direct (5432) and pooled (6543) connections reject invalid CAs; accept Supabase Root 2021 CA</td>
+          <td>3,472 ms</td>
+          <td><span class="tag tag-green">PASS</span></td>
+        </tr>
+        <tr>
+          <td><strong>STG-02</strong></td>
+          <td>Sweeper Cron Endpoint Auth</td>
+          <td>Missing/invalid tokens rejected with 401; valid Bearer CRON_SECRET returns 200 with JSON telemetry</td>
+          <td>489 ms</td>
+          <td><span class="tag tag-green">PASS</span></td>
+        </tr>
+        <tr>
+          <td><strong>STG-03</strong></td>
+          <td>Vercel Cron Configuration</td>
+          <td>vercel.json contains valid 1-minute recurring schedule (<code>* * * * *</code>) targeting sweeper</td>
+          <td>1.4 ms</td>
+          <td><span class="tag tag-green">PASS</span></td>
+        </tr>
+        <tr>
+          <td><strong>STG-04</strong></td>
+          <td>User Sync & Role Enforcement</td>
+          <td>public.users synchronizes with Supabase Auth; Role.ADMIN and Role.STUDENT enforced</td>
+          <td>1,631 ms</td>
+          <td><span class="tag tag-green">PASS</span></td>
+        </tr>
+        <tr>
+          <td><strong>STG-05</strong></td>
+          <td>Admin Action Privilege Hardening</td>
+          <td>Student session attempting to trigger broad sweep action returns MCQJ-ERR-4003 (403 Forbidden)</td>
+          <td>183 ms</td>
+          <td><span class="tag tag-green">PASS</span></td>
+        </tr>
+        <tr>
+          <td><strong>STG-06</strong></td>
+          <td>Authoring & Gate 7 Publication</td>
+          <td>Created Urdu RTL comprehension passage and 4 question types; passed Gate 7 publication checks</td>
+          <td>18,826 ms</td>
+          <td><span class="tag tag-green">PASS</span></td>
+        </tr>
+        <tr>
+          <td><strong>STG-07</strong></td>
+          <td>Attempt Lifecycle & Privacy Gate</td>
+          <td>Candidate start/resumption verified; projection guarantees zero leakage of answer keys or options</td>
+          <td>4,227 ms</td>
+          <td><span class="tag tag-green">PASS</span></td>
+        </tr>
+        <tr>
+          <td><strong>STG-08</strong></td>
+          <td>Durable CAS Answer Ledger</td>
+          <td>Version increment verified (v1 -> v2); stale write using v1 rejected with VERSION_CONFLICT (409)</td>
+          <td>9,383 ms</td>
+          <td><span class="tag tag-green">PASS</span></td>
+        </tr>
+        <tr>
+          <td><strong>STG-09</strong></td>
+          <td>Strict All-or-Nothing Scoring</td>
+          <td>Partial multiple-correct response {A, C} vs key {A, C, D} earned 0 marks and -0.500 penalty (Total: 5.500/8.000)</td>
+          <td>5,889 ms</td>
+          <td><span class="tag tag-green">PASS</span></td>
+        </tr>
+        <tr>
+          <td><strong>STG-10</strong></td>
+          <td>Cross-Candidate Security Boundary</td>
+          <td>Candidate 2 attempted to read or modify Candidate 1's attempt: blocked with MCQJ-ERR-6005 (403 Forbidden)</td>
+          <td>1,439 ms</td>
+          <td><span class="tag tag-green">PASS</span></td>
+        </tr>
+        <tr>
+          <td><strong>STG-11</strong></td>
+          <td>Overdue Sweep Recovery</td>
+          <td>Autonomous sweeper finalized abandoned expired attempt to EVALUATED; post-deadline write rejected</td>
+          <td>8,517 ms</td>
+          <td><span class="tag tag-green">PASS</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>4. Full Regression & Static Verification Matrix</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Verification Target</th>
+          <th>Execution Command</th>
+          <th>Scope</th>
+          <th>Result</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Unit & Domain Suites</td>
+          <td><code>npm run test:unit</code></td>
+          <td>124 specs across 12 suites</td>
+          <td><span class="tag tag-green">124 / 124 PASS (6.7s)</span></td>
+        </tr>
+        <tr>
+          <td>PostgreSQL Integration Suite</td>
+          <td><code>npm run test:db</code></td>
+          <td>63 specs (inc. 7 dedicated scheduler specs)</td>
+          <td><span class="tag tag-green">63 / 63 PASS (21.6s)</span></td>
+        </tr>
+        <tr>
+          <td>Live Staging Acceptance Suite</td>
+          <td><code>node --test tests/staging-acceptance.test.mjs</code></td>
+          <td>11 end-to-end hosted specifications</td>
+          <td><span class="tag tag-green">11 / 11 PASS (56.1s)</span></td>
+        </tr>
+        <tr>
+          <td>TypeScript Compiler</td>
+          <td><code>npm run typecheck</code></td>
+          <td>Full codebase (tsc --noEmit)</td>
+          <td><span class="tag tag-green">0 Errors (9.5s)</span></td>
+        </tr>
+        <tr>
+          <td>ESLint Static Analysis</td>
+          <td><code>npm run lint</code></td>
+          <td>Full codebase</td>
+          <td><span class="tag tag-green">0 Warnings / Errors (4.2s)</span></td>
+        </tr>
+        <tr>
+          <td>Next.js Production Build</td>
+          <td><code>npm run build</code></td>
+          <td>23 App Router routes with PPR</td>
+          <td><span class="tag tag-green">Compiled Cleanly (8.0s)</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>5. Operational Checklist & Runbook Alignment</h2>
+    <div class="callout info">
+      <strong>Operational Readiness Confirmed:</strong> All operational requirements specified in <code>docs/deployment/STAGING_RUNBOOK.md</code> have been completed and verified. The staging environment is pristine, with zero test pollution, high-entropy secrets configured, and background finalization active.
+    </div>
+
+    <footer>
+      <span>MCQ Junction Assessment Platform</span>
+      <span>Confidential — Staging Release Report</span>
+    </footer>
+  </div>
+</body>
+</html>

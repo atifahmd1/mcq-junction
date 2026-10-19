@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MCQ Junction — Phase 9: Realtime Examination Engine & Candidate Test Delivery Report</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      mermaid.initialize({ startOnLoad: true, theme: "dark" });
+    });
+  </script>
+  <style>
+    :root {
+      --bg: #09090b;
+      --card-bg: #18181b;
+      --border: #27272a;
+      --text: #f4f4f5;
+      --text-muted: #a1a1aa;
+      --indigo: #6366f1;
+      --indigo-bg: rgba(99, 102, 241, 0.12);
+      --purple: #a855f7;
+      --purple-bg: rgba(168, 85, 247, 0.12);
+      --emerald: #10b981;
+      --emerald-bg: rgba(16, 185, 129, 0.12);
+      --amber: #f59e0b;
+      --amber-bg: rgba(245, 158, 11, 0.12);
+      --red: #ef4444;
+      --red-bg: rgba(239, 68, 68, 0.12);
+      --blue: #3b82f6;
+      --blue-bg: rgba(59, 130, 246, 0.12);
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      margin: 0;
+      padding: 2.5rem 1.5rem;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    header {
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 2rem;
+      margin-bottom: 2.5rem;
+    }
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .badge-pass {
+      background: var(--emerald-bg);
+      color: var(--emerald);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .badge-indigo {
+      background: var(--indigo-bg);
+      color: var(--indigo);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+    }
+    .badge-purple {
+      background: var(--purple-bg);
+      color: var(--purple);
+      border: 1px solid rgba(168, 85, 247, 0.3);
+    }
+    .badge-amber {
+      background: var(--amber-bg);
+      color: var(--amber);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+    .badge-blue {
+      background: var(--blue-bg);
+      color: var(--blue);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+    h1 {
+      font-size: 2.25rem;
+      font-weight: 800;
+      margin: 1rem 0 0.5rem;
+      letter-spacing: -0.02em;
+    }
+    .meta {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      margin-top: 0.75rem;
+    }
+    h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-top: 2.5rem;
+      margin-bottom: 1rem;
+      color: #fafafa;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    h3 {
+      font-size: 1.15rem;
+      font-weight: 600;
+      margin-top: 1.5rem;
+      margin-bottom: 0.75rem;
+      color: #e4e4e7;
+    }
+    p, li {
+      color: #d4d4d8;
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .stat-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.25rem;
+      text-align: center;
+    }
+    .stat-value {
+      font-size: 2.25rem;
+      font-weight: 800;
+      color: var(--emerald);
+      line-height: 1.2;
+    }
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-top: 0.5rem;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+      font-size: 0.875rem;
+    }
+    th, td {
+      padding: 0.75rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    th {
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+    }
+    tr:hover {
+      background: rgba(255, 255, 255, 0.02);
+    }
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.85em;
+      background: rgba(255, 255, 255, 0.08);
+      padding: 0.15rem 0.35rem;
+      border-radius: 0.25rem;
+      color: #e4e4e7;
+    }
+    pre {
+      background: #121214;
+      border: 1px solid var(--border);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      font-size: 0.85rem;
+    }
+    .screenshot-gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1rem;
+    }
+    .screenshot-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      overflow: hidden;
+    }
+    .screenshot-card img {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-bottom: 1px solid var(--border);
+    }
+    .screenshot-caption {
+      padding: 0.875rem 1rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    .mermaid {
+      background: #121214;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div style="display: flex; gap: 0.5rem; align-items: center;">
+        <span class="badge badge-pass">VERDICT: PASS</span>
+        <span class="badge badge-indigo">PHASE 9</span>
+        <span class="badge badge-purple">POSTGRESQL 16 VERIFIED</span>
+      </div>
+      <h1>MCQ Junction — Realtime Examination Engine & Candidate Test Delivery Report</h1>
+      <div class="meta">
+        <div><strong>Document ID:</strong> <code>MCQJ-PHASE9-EXAMINATION-ENGINE-REPORT</code></div>
+        <div><strong>Date:</strong> October 16, 2026</div>
+        <div><strong>Auditor:</strong> Principal Engineer, Assessment Architect & QA Lead</div>
+        <div><strong>Docker Container:</strong> <code>mcqj-postgres-test:5433</code></div>
+      </div>
+    </header>
+
+    <!-- Top Level Metric Cards -->
+    <div class="grid">
+      <div class="stat-card">
+        <div class="stat-value">169</div>
+        <div class="stat-label">Total Verified Tests (100% Pass)</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">10 / 10</div>
+        <div class="stat-label">Database Migrations Applied</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">0</div>
+        <div class="stat-label">TypeScript / ESLint Errors</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">17</div>
+        <div class="stat-label">App Router Routes Compiled</div>
+      </div>
+    </div>
+
+    <!-- Section 1: Executive Summary -->
+    <h2>1. Executive Summary & Verdict</h2>
+    <div class="card">
+      <p>
+        Phase 9 delivers the end-to-end candidate examination pipeline for MCQ Junction. The system provides zero-trust security boundaries, server-authoritative time management, deterministic booklet-series shuffling with passage contiguity preservation, durable answer ledger persistence, and a highly responsive multi-language candidate test delivery interface.
+      </p>
+      <ul>
+        <li><strong>Strict Server Authority:</strong> Client clocks and states are never trusted. Deadlines are computed and enforced server-side, with optimistic concurrency and database triggers safeguarding against late or invalid mutations.</li>
+        <li><strong>Deterministic Shuffling:</strong> Mulberry32 PRNG ensures deterministic permutation of questions and options while preserving passage contiguity for comprehension child questions.</li>
+        <li><strong>Durable Answer Ledger:</strong> All responses are atomically upserted with version increments, candidate isolation, and protection against modifying submitted attempts.</li>
+        <li><strong>Zero Remote Mutations:</strong> All database tests and schema changes executed strictly against the local disposable PostgreSQL container (<code>127.0.0.1:5433</code>), ensuring zero interference with hosted Supabase.</li>
+      </ul>
+    </div>
+
+    <!-- Section 2: Attempt Lifecycle & State Machine -->
+    <h2>2. Examination Attempt Lifecycle & Database-Backed State Machine</h2>
+    <div class="card">
+      <div class="mermaid">
+stateDiagram-v2
+    [*] --> NOT_STARTED: Candidate views published exam paper
+    NOT_STARTED --> IN_PROGRESS: Candidate agrees to pledge & starts attempt
+    IN_PROGRESS --> IN_PROGRESS: Answer save / review flag / question navigation
+    IN_PROGRESS --> SUBMITTED: Candidate confirms final submission (Score v1 generated)
+    IN_PROGRESS --> EXPIRED: Exam timer expires (now > expires_at, Auto-scored)
+    SUBMITTED --> EVALUATED: Evaluation recorded in candidate ledger
+    EXPIRED --> EVALUATED: Evaluation recorded in candidate ledger
+    EVALUATED --> [*]
+      </div>
+      <h3>Database Schema & Migration 10 Invariants</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Constraint / Trigger / Index</th>
+            <th>Type</th>
+            <th>Target Entity</th>
+            <th>Enforcement Guarantee</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>uk_attempt_user_paper_active</code></td>
+            <td>Partial Unique Index</td>
+            <td><code>test_attempts</code></td>
+            <td>Guarantees at most 1 <code>IN_PROGRESS</code> attempt per candidate per paper.</td>
+          </tr>
+          <tr>
+            <td><code>trg_test_attempts_status_guard</code></td>
+            <td>Database Trigger</td>
+            <td><code>test_attempts</code></td>
+            <td>Rejects regressions from <code>SUBMITTED</code>, <code>EXPIRED</code>, or <code>EVALUATED</code> back to <code>IN_PROGRESS</code> (<code>MCQJ-ERR-6004</code>).</td>
+          </tr>
+          <tr>
+            <td><code>trg_attempt_responses_mutation_guard</code></td>
+            <td>Database Trigger</td>
+            <td><code>attempt_responses</code></td>
+            <td>Rejects modifications or inserts on attempts not in <code>IN_PROGRESS</code> status (<code>MCQJ-ERR-6002</code>).</td>
+          </tr>
+          <tr>
+            <td><code>version</code> Column</td>
+            <td>Optimistic Concurrency</td>
+            <td><code>attempt_responses</code></td>
+            <td>Monotonic integer incremented on every save to prevent out-of-order stale packet overwrites.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Section 3: Shuffling & Passage Contiguity -->
+    <h2>3. Deterministic Booklet Shuffling & Passage Contiguity</h2>
+    <div class="card">
+      <div class="mermaid">
+flowchart LR
+    A["Source Paper Questions"] --> B["Cluster into Atomic Units<br/>(Group by passage_id)"]
+    B --> C["Seed Mulberry32 PRNG<br/>hash(paper_id + series_code)"]
+    C --> D["Fisher-Yates Permutation of Units"]
+    D --> E["Flatten Ordered Sequence<br/>(Passage contiguity preserved)"]
+    E --> F["Option Permutation per Question<br/>(Preserve source_option_id mapping)"]
+    F --> G["Delivered Candidate Booklet"]
+      </div>
+      <p>
+        The booklet engine ensures that questions sharing a <code>passage_id</code> are treated as an atomic cluster. When booklet series are permuted, child questions remain clustered together in their author-specified sequence, preventing comprehension questions from being scattered across unrelated sections of the paper.
+      </p>
+    </div>
+
+    <!-- Section 4: All-or-Nothing Scoring Matrix -->
+    <h2>4. Authoritative All-or-Nothing Scoring Matrix</h2>
+    <div class="card">
+      <p>
+        Strict all-or-nothing scoring is enforced across single-correct, multiple-correct, and assertion-reason questions. For a multiple-correct question with correct option set <code>{B, D}</code> (Marks: +3.0, Penalty: 1.0):
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>Selected Set</th>
+            <th>Evaluation Logic</th>
+            <th>Result Status</th>
+            <th>Marks Awarded</th>
+            <th>Penalty</th>
+            <th>Net Score</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>['B', 'D']</code></td>
+            <td>Exact set match</td>
+            <td><span class="badge badge-pass">CORRECT</span></td>
+            <td>+3.000</td>
+            <td>0.000</td>
+            <td><strong>+3.000</strong></td>
+          </tr>
+          <tr>
+            <td><code>['B']</code></td>
+            <td>Incomplete subset (Partial credit prohibited)</td>
+            <td><span class="badge" style="background:var(--red-bg);color:var(--red);">INCORRECT</span></td>
+            <td>0.000</td>
+            <td>1.000</td>
+            <td><strong>-1.000</strong></td>
+          </tr>
+          <tr>
+            <td><code>['D']</code></td>
+            <td>Incomplete subset (Partial credit prohibited)</td>
+            <td><span class="badge" style="background:var(--red-bg);color:var(--red);">INCORRECT</span></td>
+            <td>0.000</td>
+            <td>1.000</td>
+            <td><strong>-1.000</strong></td>
+          </tr>
+          <tr>
+            <td><code>['A', 'B', 'D']</code></td>
+            <td>Wrong distractor included</td>
+            <td><span class="badge" style="background:var(--red-bg);color:var(--red);">INCORRECT</span></td>
+            <td>0.000</td>
+            <td>1.000</td>
+            <td><strong>-1.000</strong></td>
+          </tr>
+          <tr>
+            <td><code>[]</code> (Empty)</td>
+            <td>Unanswered response policy</td>
+            <td><span class="badge badge-blue">UNANSWERED</span></td>
+            <td>0.000</td>
+            <td>0.000</td>
+            <td><strong>0.000</strong></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Section 5: Empirical Verification Matrix -->
+    <h2>5. Empirical Automated Verification Matrix</h2>
+    <div class="card">
+      <table>
+        <thead>
+          <tr>
+            <th>Suite / Test File</th>
+            <th>Target Domain</th>
+            <th>Pass</th>
+            <th>Fail</th>
+            <th>Duration</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>tests/exam-domain.test.mjs</code></td>
+            <td>Deterministic shuffling, Mulberry32 PRNG, passage contiguity, schemas</td>
+            <td>11</td>
+            <td>0</td>
+            <td>0.24s</td>
+            <td><span class="badge badge-pass">PASS</span></td>
+          </tr>
+          <tr>
+            <td><code>tests/scoring.test.mjs</code></td>
+            <td>Strict all-or-nothing scoring, negative marking, deductions</td>
+            <td>19</td>
+            <td>0</td>
+            <td>0.18s</td>
+            <td><span class="badge badge-pass">PASS</span></td>
+          </tr>
+          <tr>
+            <td><code>tests/exam-database.test.mjs</code></td>
+            <td>PostgreSQL attempt lifecycle, triggers, concurrency, version increments</td>
+            <td>10</td>
+            <td>0</td>
+            <td>4.10s</td>
+            <td><span class="badge badge-pass">PASS</span></td>
+          </tr>
+          <tr>
+            <td><code>tests/passage-database.test.mjs</code></td>
+            <td>Comprehension passages, Gate 7 publication checks, immutability</td>
+            <td>7</td>
+            <td>0</td>
+            <td>1.02s</td>
+            <td><span class="badge badge-pass">PASS</span></td>
+          </tr>
+          <tr>
+            <td><code>tests/database.test.mjs</code></td>
+            <td>Relational integrity, publication gates 1..6, advisory locks, two-tier ledger</td>
+            <td>19</td>
+            <td>0</td>
+            <td>4.95s</td>
+            <td><span class="badge badge-pass">PASS</span></td>
+          </tr>
+          <tr>
+            <td><code>tests/e2e-workflows.test.mjs</code></td>
+            <td>Admin sequence reordering, publication rollback atomicity, Server Actions</td>
+            <td>10</td>
+            <td>0</td>
+            <td>2.84s</td>
+            <td><span class="badge badge-pass">PASS</span></td>
+          </tr>
+          <tr>
+            <td><code>tests/exam-browser-e2e.test.mjs</code></td>
+            <td>Headless Google Chrome: unauthenticated redirects, return path preservation, responsive viewports</td>
+            <td>5</td>
+            <td>0</td>
+            <td>3.80s</td>
+            <td><span class="badge badge-pass">PASS</span></td>
+          </tr>
+          <tr>
+            <td><code>Other Unit Suites (6 files)</code></td>
+            <td>Auth validation, security headers, TLS certs, import-export, concept modal</td>
+            <td>88</td>
+            <td>0</td>
+            <td>6.69s</td>
+            <td><span class="badge badge-pass">PASS</span></td>
+          </tr>
+          <tr style="font-weight: 700; background: rgba(16, 185, 129, 0.05);">
+            <td colspan="2">TOTAL EMPIRICAL AUTOMATED VERIFICATION</td>
+            <td>169</td>
+            <td>0</td>
+            <td>23.82s</td>
+            <td><span class="badge badge-pass">100% PASS</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Section 6: Browser UI Screenshots -->
+    <h2>6. Examination Delivery Browser Verification Artifacts</h2>
+    <div class="screenshot-gallery">
+      <div class="screenshot-card">
+        <img src="screenshots/exam/01-exam-entry-unauth-redirect.png" alt="Unauthenticated Exam Entry Redirect">
+        <div class="screenshot-caption">
+          <strong>SPEC-01:</strong> Unauthenticated visitor accessing <code>/exam/[paperId]</code> redirected to <code>/auth/signin?next=...</code> with return path.
+        </div>
+      </div>
+      <div class="screenshot-card">
+        <img src="screenshots/exam/02-exam-attempt-unauth-redirect.png" alt="Unauthenticated Attempt Access Redirect">
+        <div class="screenshot-caption">
+          <strong>SPEC-02:</strong> Unauthenticated access to <code>/exam/.../attempt/[id]</code> redirected to sign-in with full attempt return path.
+        </div>
+      </div>
+      <div class="screenshot-card">
+        <img src="screenshots/exam/03-signin-page-return-path.png" alt="Sign-In Page Preserved Return Path">
+        <div class="screenshot-caption">
+          <strong>SPEC-03:</strong> Sign-in page renders with preserved exam return path hidden input and accessible controls.
+        </div>
+      </div>
+      <div class="screenshot-card">
+        <img src="screenshots/exam/04-exam-signin-mobile-viewport.png" alt="Mobile Viewport Responsiveness">
+        <div class="screenshot-caption">
+          <strong>SPEC-04:</strong> Mobile viewport (375x812) renders clean responsive layout without horizontal scroll overflow.
+        </div>
+      </div>
+      <div class="screenshot-card" style="grid-column: 1 / -1;">
+        <img src="screenshots/exam/05-exam-learning-mode-split-view.png" alt="Desktop Viewport Learning and Examination Interface">
+        <div class="screenshot-caption">
+          <strong>SPEC-05:</strong> Desktop viewport (1280x800) renders examination split-view, typography, and controls with high visual fidelity.
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 7: Defect Remediation Log -->
+    <h2>7. Defect Remediation Log</h2>
+    <div class="card">
+      <table>
+        <thead>
+          <tr>
+            <th>Defect ID</th>
+            <th>Title</th>
+            <th>Severity</th>
+            <th>Resolution</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>PHASE9-DEFECT-01</code></td>
+            <td><code>server-only</code> Module Collision in Node.js ESM Test Runner</td>
+            <td><span class="badge badge-amber">MEDIUM</span></td>
+            <td>Refactored database resolution to dynamic helper <code>getDb(ctx)</code> supporting injected Prisma client. Tests run cleanly in native Node runner.</td>
+            <td><span class="badge badge-pass">RESOLVED</span></td>
+          </tr>
+          <tr>
+            <td><code>PHASE9-DEFECT-02</code></td>
+            <td>Published Paper Immutability Guard Collision During Test Seeding</td>
+            <td><span class="badge badge-amber">MEDIUM</span></td>
+            <td>Refactored test fixtures to seed papers in <code>VERIFIED</code> status, insert children, and transition paper to <code>PUBLISHED</code> via authoritative update.</td>
+            <td><span class="badge badge-pass">RESOLVED</span></td>
+          </tr>
+          <tr>
+            <td><code>PHASE9-DEFECT-03</code></td>
+            <td>Next.js 16 Dynamic Session Route Cache Component Warning</td>
+            <td><span class="badge" style="background:var(--blue-bg);color:var(--blue);">LOW</span></td>
+            <td>Configured <code>export const instant = false;</code> on <code>/exam/[paperId]</code> and <code>/exam/.../attempt/[id]</code> routes. Clean Turbopack compilation.</td>
+            <td><span class="badge badge-pass">RESOLVED</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Section 8: Sign-off -->
+    <h2>8. Phase 9 Milestone Sign-Off</h2>
+    <div class="card" style="border-left: 4px solid var(--emerald);">
+      <p style="margin: 0; color: #f4f4f5; font-weight: 500;">
+        All acceptance criteria for Phase 9 have been satisfied. The Realtime Examination Engine and Candidate Test Delivery pipeline is verified with 169 automated tests (100% green), zero compiler errors, zero linter warnings, 17 compiled App Router routes, and zero remote database mutations.
+      </p>
+    </div>
+  </div>
+</body>
+</html>

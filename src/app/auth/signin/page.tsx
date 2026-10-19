@@ -1,14 +1,32 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useState, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   signInWithEmail,
   signUpWithEmail,
   signInWithOAuth,
   type AuthState,
 } from "@/app/auth/actions";
+import Logo from "@/components/ui/Logo";
 
-export default function SignInPage() {
+function sanitizeNextPath(raw: string | null): string {
+  if (!raw) return "";
+  const trimmed = raw.trim();
+  if (
+    trimmed.startsWith("/") &&
+    !trimmed.startsWith("//") &&
+    !trimmed.startsWith("/\\")
+  ) {
+    return trimmed;
+  }
+  return "";
+}
+
+function SignInContent() {
+  const searchParams = useSearchParams();
+  const nextParam = sanitizeNextPath(searchParams.get("next"));
+  const queryError = searchParams.get("error");
   const [isSignUp, setIsSignUp] = useState(false);
 
   const [signInState, signInAction, isSignInPending] = useActionState<
@@ -37,32 +55,33 @@ export default function SignInPage() {
 
   const activeState = isSignUp ? signUpState : signInState;
   const isPending = isSignUp ? isSignUpPending : isSignInPending;
+  const errorMessage =
+    activeState?.error ||
+    (queryError ? "Authentication error: " + queryError : null);
 
   return (
-    <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
-      <div className="w-full max-w-md space-y-8 rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-        <div className="text-center">
-          <p className="text-xs font-semibold tracking-wider text-indigo-600 uppercase dark:text-indigo-400">
-            MCQ Junction
-          </p>
-          <h2 className="mt-2 text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
-            {isSignUp ? "Create your account" : "Sign in to your account"}
+    <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 py-12 sm:px-6 lg:px-8 bg-[#0B0D0F]">
+      <div className="w-full max-w-md space-y-8 rounded-2xl border border-[#2A2F34] bg-[#111416] p-6 sm:p-8 shadow-2xl">
+        <div className="text-center flex flex-col items-center">
+          <Logo />
+          <h2 className="mt-4 text-2xl font-bold tracking-tight text-[#F1F2F3]">
+            {isSignUp ? "Create your account" : "Sign in to MCQ Junction"}
           </h2>
-          <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
+          <p className="mt-1.5 text-xs sm:text-sm text-[#A1A1AA]">
             {isSignUp
-              ? "Join MCQ Junction to practice and master exams"
-              : "Welcome back! Enter your details or sign in with social login"}
+              ? "Join to practice questions, take mock tests, and track progress"
+              : "Welcome back! Access your mock exams and revision notes"}
           </p>
         </div>
 
         {/* OAuth Social Login Buttons */}
         <div className="space-y-3">
-          <form action={() => signInWithOAuth("github")}>
+          <form action={() => signInWithOAuth("github", nextParam)}>
             <button
               type="submit"
-              className="flex w-full items-center justify-center gap-3 rounded-lg border border-zinc-300 bg-white px-4 py-2.5 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-750"
+              className="flex w-full items-center justify-center gap-3 rounded-lg border border-[#2A2F34] bg-[#171A1D] px-4 py-2.5 text-xs sm:text-sm font-medium text-[#F1F2F3] transition hover:bg-[#1D2125] hover:border-[#D6B36A]/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D6B36A]"
             >
-              <svg className="h-5 w-5 fill-current" viewBox="0 0 24 24" aria-hidden="true">
+              <svg className="h-4 w-4 fill-current text-[#F1F2F3]" viewBox="0 0 24 24" aria-hidden="true">
                 <path
                   fillRule="evenodd"
                   clipRule="evenodd"
@@ -73,12 +92,12 @@ export default function SignInPage() {
             </button>
           </form>
 
-          <form action={() => signInWithOAuth("google")}>
+          <form action={() => signInWithOAuth("google", nextParam)}>
             <button
               type="submit"
-              className="flex w-full items-center justify-center gap-3 rounded-lg border border-zinc-300 bg-white px-4 py-2.5 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-750"
+              className="flex w-full items-center justify-center gap-3 rounded-lg border border-[#2A2F34] bg-[#171A1D] px-4 py-2.5 text-xs sm:text-sm font-medium text-[#F1F2F3] transition hover:bg-[#1D2125] hover:border-[#D6B36A]/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D6B36A]"
             >
-              <svg className="h-5 w-5" viewBox="0 0 24 24" aria-hidden="true">
+              <svg className="h-4 w-4" viewBox="0 0 24 24" aria-hidden="true">
                 <path
                   fill="#4285F4"
                   d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -102,20 +121,20 @@ export default function SignInPage() {
         </div>
 
         <div className="relative flex items-center justify-center">
-          <div className="w-full border-t border-zinc-200 dark:border-zinc-800" />
-          <span className="absolute bg-white px-3 text-xs text-zinc-500 uppercase dark:bg-zinc-900">
+          <div className="w-full border-t border-[#2A2F34]" />
+          <span className="absolute bg-[#111416] px-3 text-[11px] font-mono uppercase tracking-wider text-[#717780]">
             or continue with email
           </span>
         </div>
 
         {/* Feedback message banner */}
-        {activeState?.error && (
+        {errorMessage && (
           <div
             role="alert"
             aria-live="polite"
-            className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-400"
+            className="rounded-lg border border-[#F87171]/40 bg-[#F87171]/10 p-3 text-xs text-[#F87171]"
           >
-            {activeState.error}
+            {errorMessage}
           </div>
         )}
 
@@ -123,7 +142,7 @@ export default function SignInPage() {
           <div
             role="status"
             aria-live="polite"
-            className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700 dark:border-emerald-900/50 dark:bg-emerald-950/30 dark:text-emerald-400"
+            className="rounded-lg border border-[#22C55E]/40 bg-[#22C55E]/10 p-3 text-xs text-[#22C55E]"
           >
             {activeState.success}
           </div>
@@ -134,11 +153,14 @@ export default function SignInPage() {
           action={isSignUp ? signUpAction : signInAction}
           className="space-y-4"
         >
+          {/* Preserve return destination */}
+          {nextParam && <input type="hidden" name="next" value={nextParam} />}
+
           {isSignUp && (
             <div>
               <label
                 htmlFor="name"
-                className="block text-sm font-medium text-zinc-700 dark:text-zinc-300"
+                className="block text-xs font-medium text-[#A1A1AA]"
               >
                 Full Name
               </label>
@@ -148,7 +170,7 @@ export default function SignInPage() {
                 type="text"
                 autoComplete="name"
                 placeholder="Jane Doe"
-                className="mt-1 block w-full rounded-lg border border-zinc-300 px-3.5 py-2 text-sm text-zinc-900 placeholder-zinc-400 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
+                className="mt-1 block w-full rounded-lg border border-[#2A2F34] bg-[#171A1D] px-3.5 py-2 text-xs sm:text-sm text-[#F1F2F3] placeholder-[#717780] focus:border-[#D6B36A] focus:outline-none focus:ring-1 focus:ring-[#D6B36A]"
               />
             </div>
           )}
@@ -156,7 +178,7 @@ export default function SignInPage() {
           <div>
             <label
               htmlFor="email"
-              className="block text-sm font-medium text-zinc-700 dark:text-zinc-300"
+              className="block text-xs font-medium text-[#A1A1AA]"
             >
               Email address
             </label>
@@ -167,14 +189,14 @@ export default function SignInPage() {
               required
               autoComplete="email"
               placeholder="you@example.com"
-              className="mt-1 block w-full rounded-lg border border-zinc-300 px-3.5 py-2 text-sm text-zinc-900 placeholder-zinc-400 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
+              className="mt-1 block w-full rounded-lg border border-[#2A2F34] bg-[#171A1D] px-3.5 py-2 text-xs sm:text-sm text-[#F1F2F3] placeholder-[#717780] focus:border-[#D6B36A] focus:outline-none focus:ring-1 focus:ring-[#D6B36A]"
             />
           </div>
 
           <div>
             <label
               htmlFor="password"
-              className="block text-sm font-medium text-zinc-700 dark:text-zinc-300"
+              className="block text-xs font-medium text-[#A1A1AA]"
             >
               Password
             </label>
@@ -186,14 +208,14 @@ export default function SignInPage() {
               minLength={isSignUp ? 8 : undefined}
               autoComplete={isSignUp ? "new-password" : "current-password"}
               placeholder={isSignUp ? "At least 8 characters" : "••••••••"}
-              className="mt-1 block w-full rounded-lg border border-zinc-300 px-3.5 py-2 text-sm text-zinc-900 placeholder-zinc-400 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
+              className="mt-1 block w-full rounded-lg border border-[#2A2F34] bg-[#171A1D] px-3.5 py-2 text-xs sm:text-sm text-[#F1F2F3] placeholder-[#717780] focus:border-[#D6B36A] focus:outline-none focus:ring-1 focus:ring-[#D6B36A]"
             />
           </div>
 
           <button
             type="submit"
             disabled={isPending}
-            className="flex w-full justify-center rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-60"
+            className="flex w-full justify-center rounded-lg bg-[#D6B36A] px-4 py-2.5 text-xs sm:text-sm font-semibold text-[#0B0D0F] shadow-sm transition hover:bg-[#E4C582] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D6B36A] disabled:opacity-50"
           >
             {isPending
               ? "Please wait..."
@@ -203,14 +225,14 @@ export default function SignInPage() {
           </button>
         </form>
 
-        <div className="text-center text-sm text-zinc-600 dark:text-zinc-400">
+        <div className="text-center text-xs text-[#A1A1AA]">
           {isSignUp ? (
             <span>
               Already have an account?{" "}
               <button
                 type="button"
                 onClick={() => setIsSignUp(false)}
-                className="font-semibold text-indigo-600 hover:text-indigo-500 dark:text-indigo-400"
+                className="font-semibold text-[#D6B36A] hover:underline"
               >
                 Sign in
               </button>
@@ -221,7 +243,7 @@ export default function SignInPage() {
               <button
                 type="button"
                 onClick={() => setIsSignUp(true)}
-                className="font-semibold text-indigo-600 hover:text-indigo-500 dark:text-indigo-400"
+                className="font-semibold text-[#D6B36A] hover:underline"
               >
                 Sign up
               </button>
@@ -230,5 +252,19 @@ export default function SignInPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SignInPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 py-12 bg-[#0B0D0F]">
+          <div className="text-xs font-mono text-[#717780]">Loading sign in...</div>
+        </div>
+      }
+    >
+      <SignInContent />
+    </Suspense>
   );
 }

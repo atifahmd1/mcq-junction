@@ -1,0 +1,113 @@
+{
+  "audit_version": "9.0.0",
+  "phase": "Phase 9: Realtime Examination Engine & Candidate Test Delivery",
+  "audit_date": "2026-10-16",
+  "status": "PASS",
+  "summary": {
+    "total_findings": 3,
+    "resolved": 3,
+    "unresolved": 0,
+    "critical": 0,
+    "high": 0,
+    "medium": 2,
+    "low": 1,
+    "informational": 0
+  },
+  "metrics": {
+    "lifecycle_states_supported": [
+      "NOT_STARTED",
+      "IN_PROGRESS",
+      "SUBMITTED",
+      "EXPIRED",
+      "EVALUATED"
+    ],
+    "question_types_supported": [
+      "SINGLE_CORRECT",
+      "MULTIPLE_CORRECT",
+      "ASSERTION_REASON",
+      "COMPREHENSION_CHILD"
+    ],
+    "languages_supported": [
+      "EN (English - LTR)",
+      "HI (Hindi - Devanagari Unicode)",
+      "UR (Urdu - Perso-Arabic RTL with isolated LTR options and actions)",
+      "BN (Bangla - Bengali Unicode)"
+    ],
+    "all_or_nothing_scoring_matrix": {
+      "exact_match": "Award full positive marks (e.g. +3.0)",
+      "partial_subset": "Award zero positive marks; deduct configured negative penalty (e.g. -1.0)",
+      "distractor_selected": "Award zero positive marks; deduct configured negative penalty (e.g. -1.0)",
+      "unanswered": "Award 0.0 marks; zero penalty (0.0)",
+      "duplicate_inputs": "Normalized to set; exact match awards full positive marks",
+      "partial_credit_permitted": "FALSE (Strict all-or-nothing scoring enforced across client, service, and database)"
+    },
+    "automated_tests": {
+      "total_tests": 169,
+      "passed": 169,
+      "failed": 0,
+      "breakdown": {
+        "unit_and_domain_suites": 118,
+        "database_integration_suite": 19,
+        "e2e_workflows_suite": 10,
+        "passage_database_suite": 7,
+        "exam_database_suite": 10,
+        "browser_e2e_suite": 5
+      }
+    },
+    "static_analysis": {
+      "typescript_errors": 0,
+      "eslint_errors": 0,
+      "eslint_warnings": 0,
+      "next_production_build": "SUCCESS (17 App Router routes compiled cleanly with Turbopack and Partial Prerendering)"
+    },
+    "database_verification": {
+      "docker_container": "mcqj-postgres-test",
+      "engine_version": "PostgreSQL 16.13",
+      "endpoint": "127.0.0.1:5433/mcq_junction_test",
+      "migrations_applied": 10,
+      "remote_database_mutations": 0,
+      "isolation_safety": "FAIL-CLOSED"
+    }
+  },
+  "findings": [
+    {
+      "finding_id": "PHASE9-DEFECT-01",
+      "title": "server-only Module Import Collision in Node.js ESM Test Runner",
+      "severity": "MEDIUM",
+      "category": "RUNTIME_ISOLATION",
+      "description": "Static top-level import of src/lib/prisma.ts in examination service triggered Node.js ESM test failure 'This module cannot be imported from a Client Component module' when executed via node --test outside Next.js bundling context.",
+      "resolution": "Refactored database access to dynamic resolution helper getDb(ctx) supporting injected prismaClient from caller context or dynamic import of prisma.ts. All unit and integration tests execute cleanly in native Node ESM runner.",
+      "status": "RESOLVED"
+    },
+    {
+      "finding_id": "PHASE9-DEFECT-02",
+      "title": "Published Paper Immutability Guard Collision During Test Seeding",
+      "severity": "MEDIUM",
+      "category": "DATABASE_INTEGRITY",
+      "description": "Database integration tests attempting to insert child entities (sections, occurrences, answer keys, booklets) directly into a paper created in PUBLISHED state triggered database trigger fn_guard_published_content_immutability (MCQJ-ERR-4006).",
+      "resolution": "Refactored test data fixtures to seed exam papers in VERIFIED status, insert all child entities, and transition paper to PUBLISHED state via an authoritative update. Tests accurately simulate production editorial workflow.",
+      "status": "RESOLVED"
+    },
+    {
+      "finding_id": "PHASE9-DEFECT-03",
+      "title": "Next.js 16 Dynamic Session Route Cache Component Warning",
+      "severity": "LOW",
+      "category": "NEXTJS_CONVENTIONS",
+      "description": "App Router dynamic routes inspecting cookies() or connection() without fallback suspense triggered Next.js 16 Cache Components build errors during static generation phase.",
+      "resolution": "Configured explicit export const instant = false; on /exam/[paperId] and /exam/[paperId]/attempt/[attemptId] routes, correctly declaring them dynamic server-rendered routes under PPR.",
+      "status": "RESOLVED"
+    }
+  ],
+  "gates_enforced": [
+    "Gate 1: Authoritative Candidate Authentication & Session Verification (assertCandidateSession)",
+    "Gate 2: Partial Unique Index uk_attempt_user_paper_active blocks duplicate active attempts",
+    "Gate 3: Resumption Idempotency returns active attempt on repeated start requests",
+    "Gate 4: Database Trigger trg_test_attempts_status_guard rejects terminal state regressions",
+    "Gate 5: Database Trigger trg_attempt_responses_mutation_guard rejects mutations on non-IN_PROGRESS attempts",
+    "Gate 6: Server-Authoritative Timer calculates expires_at and rejects late saves (MCQJ-ERR-6003)",
+    "Gate 7: Durable Answer Ledger enforces optimistic concurrency version increments",
+    "Gate 8: Deterministic Booklet Shuffling (Mulberry32 PRNG + Fisher-Yates) preserves passage contiguity and source-option identity mapping",
+    "Gate 9: Strict All-or-Nothing Scoring for single and multiple correct items with atomic evaluation recording",
+    "Gate 10: Local Disposable Test Database Isolation (127.0.0.1:5433) with zero remote mutations"
+  ]
+}

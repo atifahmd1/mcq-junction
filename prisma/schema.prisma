@@ -1,3 +1,8 @@
+// ============================================================================
+// MCQ Junction — Production Prisma 7 Schema (Phase 3B Hardened)
+// File: prisma/schema.prisma
+// ============================================================================
+
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
@@ -7,8 +12,11 @@ datasource db {
   provider = "postgresql"
 }
 
-// Temporary verification model for Module 2 only.
-// Not a product User/Question/Exam table.
+// ----------------------------------------------------------------------------
+// 1. Existing System & User Baseline (Preserved for compatibility)
+// ----------------------------------------------------------------------------
+
+// Verification model for Module 2 health checks.
 model DatabaseTest {
   id        Int      @id @default(autoincrement())
   note      String
@@ -22,9 +30,10 @@ enum Role {
   CONTRIBUTOR
   REVIEWER
   ADMIN
+
+  @@map("Role")
 }
 
-// Application User entity synced from Supabase Auth identity on signup/login.
 model User {
   id        String   @id @db.Uuid // Mirrors Supabase Auth auth.users.id (native UUID)
   email     String   @unique
@@ -34,6 +43,501 @@ model User {
   createdAt DateTime @default(now()) @db.Timestamptz(6) @map("created_at")
   updatedAt DateTime @updatedAt @db.Timestamptz(6) @map("updated_at")
 
+  attempts  TestAttempt[]
+
   @@map("users")
 }
 
+// ----------------------------------------------------------------------------
+// 2. Core Domain Enumerations
+// ----------------------------------------------------------------------------
+
+enum ExamTier {
+  STATE_LEVEL
+  NATIONAL_LEVEL
+  INSTITUTIONAL
+
+  @@map("exam_tier_enum")
+}
+
+enum PaperPublishStatus {
+  DRAFT
+  EDITORIAL_REVIEW
+  VERIFIED
+  PUBLISHED
+  ARCHIVED
+
+  @@map("paper_publish_status_enum")
+}
+
+enum QuestionType {
+  SINGLE_CORRECT
+  MULTIPLE_CORRECT
+  ASSERTION_REASON
+  SINGLE_CHOICE
+  MULTIPLE_CHOICE
+  COMPREHENSION_CHILD
+  NUMERICAL_DISCRETE
+
+  @@map("question_type_enum")
+}
+
+enum KeyStatus {
+  PROVISIONAL
+  ACTIVE
+  CONTESTED
+  SUPERSEDED
+  WITHDRAWN
+
+  @@map("key_status_enum")
+}
+
+enum AttemptStatus {
+  IN_PROGRESS
+  SUBMITTED
+  EVALUATED
+  EXPIRED
+  DISQUALIFIED
+  ABANDONED
+
+  @@map("attempt_status_enum")
+}
+
+enum LanguageCode {
+  EN
+  HI
+  UR
+  BN
+  TA
+  TE
+
+  @@map("language_code_enum")
+}
+
+enum WithdrawalPolicy {
+  FULL_MARKS_AWARDED
+  EXCLUDED_FROM_TOTAL
+
+  @@map("withdrawal_policy_enum")
+}
+
+// ----------------------------------------------------------------------------
+// 3. Organization, Examination & Paper Hierarchy
+// ----------------------------------------------------------------------------
+
+model ConductingBody {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code            String   @unique @db.VarChar(50)
+  fullName        String   @map("full_name") @db.VarChar(255)
+  regionCode      String   @map("region_code") @db.VarChar(50)
+  officialWebsite String?  @map("official_website") @db.VarChar(500)
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  exams           Exam[]
+
+  @@map("conducting_bodies")
+}
+
+model Exam {
+  id               String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  conductingBodyId String         @map("conducting_body_id") @db.Uuid
+  code             String         @unique @db.VarChar(100)
+  title            String         @db.VarChar(255)
+  tier             ExamTier       @default(STATE_LEVEL)
+  createdAt        DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime       @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  conductingBody   ConductingBody @relation(fields: [conductingBodyId], references: [id], onDelete: Restrict)
+  sessions         ExamSession[]
+
+  @@map("exams")
+}
+
+model ExamSession {
+  id              String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  examId          String      @map("exam_id") @db.Uuid
+  sessionYear     Int         @map("session_year")
+  cycleCode       String      @map("cycle_code") @db.VarChar(50)
+  advertisementNo String?     @map("advertisement_no") @db.VarChar(100)
+  startDate       DateTime?   @map("start_date") @db.Date
+  endDate         DateTime?   @map("end_date") @db.Date
+  createdAt       DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime    @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  exam            Exam        @relation(fields: [examId], references: [id], onDelete: Restrict)
+  papers          ExamPaper[]
+
+  @@unique([examId, sessionYear, cycleCode], name: "uk_exam_session_cycle")
+  @@map("exam_sessions")
+}
+
+model ExamPaper {
+  id                   String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sessionId            String             @map("session_id") @db.Uuid
+  paperCode            String             @unique @map("paper_code") @db.VarChar(100)
+  title                String             @db.VarChar(255)
+  publishStatus        PaperPublishStatus @default(DRAFT) @map("publish_status")
+  publishedAt          DateTime?          @map("published_at") @db.Timestamptz(6)
+  totalDurationMinutes Int                @map("total_duration_minutes")
+  totalQuestions       Int                @map("total_questions")
+  maxScore             Decimal            @map("max_score") @db.Decimal(8, 3)
+  createdAt            DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt            DateTime           @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  session              ExamSession        @relation(fields: [sessionId], references: [id], onDelete: Restrict)
+  sections             PaperSection[]
+  occurrences          PaperQuestionOccurrence[]
+  markingScheme        PaperMarkingScheme?
+  bookletSeries        BookletSeries[]
+  bookletQuestionMappings BookletQuestionMapping[]
+  answerKeyVersions    AnswerKeyVersion[]
+  answerKeyItems       AnswerKeyItem[]
+  attempts             TestAttempt[]
+  attemptResponses     AttemptResponse[]
+
+  @@map("exam_papers")
+}
+
+model PaperSection {
+  id             String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  paperId        String                    @map("paper_id") @db.Uuid
+  sectionOrder   Int                       @map("section_order")
+  title          String                    @db.VarChar(255)
+  totalQuestions Int                       @map("total_questions")
+  isOptional     Boolean                   @default(false) @map("is_optional")
+  createdAt      DateTime                  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime                  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  paper          ExamPaper                 @relation(fields: [paperId], references: [id], onDelete: Restrict)
+  occurrences    PaperQuestionOccurrence[]
+  scoringOverride SectionScoringOverride?
+
+  @@unique([paperId, id], name: "uk_paper_section_composite")
+  @@unique([paperId, sectionOrder], name: "uk_paper_section_order")
+  @@map("paper_sections")
+}
+
+// ----------------------------------------------------------------------------
+// 4. Question Bank & Historical Content Representations
+// ----------------------------------------------------------------------------
+
+model ConceptualQuestion {
+  id               String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  canonicalRefCode String                    @unique @map("canonical_ref_code") @db.VarChar(100)
+  primarySubject   String                    @map("primary_subject") @db.VarChar(100)
+  defaultTopic     String                    @map("default_topic") @db.VarChar(150)
+  questionType     QuestionType              @default(SINGLE_CORRECT) @map("question_type")
+  createdAt        DateTime                  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime                  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  occurrences      PaperQuestionOccurrence[]
+
+  @@map("conceptual_questions")
+}
+
+model ComprehensionPassage {
+  id             String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  passageRefCode String                    @unique @map("passage_ref_code") @db.VarChar(100)
+  title          String?                   @db.VarChar(255)
+  bodyText       String                    @map("body_text") @db.Text
+  languageCode   LanguageCode              @default(EN) @map("language_code")
+  imageUrl       String?                   @map("image_url") @db.VarChar(1000)
+  imageAlt       String?                   @map("image_alt") @db.VarChar(255)
+  createdAt      DateTime                  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime                  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  occurrences    PaperQuestionOccurrence[]
+
+  @@map("comprehension_passages")
+}
+
+model PaperQuestionOccurrence {
+  id                    String                         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  paperId               String                         @map("paper_id") @db.Uuid
+  sectionId             String                         @map("section_id") @db.Uuid
+  conceptualQuestionId  String                         @map("conceptual_question_id") @db.Uuid
+  passageId             String?                        @map("passage_id") @db.Uuid
+  sequenceNumber        Int                            @map("sequence_number")
+  questionType          QuestionType                   @default(SINGLE_CORRECT) @map("question_type")
+  marksOverride         Decimal?                       @map("marks_override") @db.Decimal(6, 3)
+  negativeMarksOverride Decimal?                       @map("negative_marks_override") @db.Decimal(6, 3)
+  createdAt             DateTime                       @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt             DateTime                       @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  paper                 ExamPaper                      @relation(fields: [paperId], references: [id], onDelete: Restrict)
+  section               PaperSection                   @relation(fields: [paperId, sectionId], references: [paperId, id], onDelete: Restrict)
+  conceptualQuestion    ConceptualQuestion             @relation(fields: [conceptualQuestionId], references: [id], onDelete: Restrict)
+  passage               ComprehensionPassage?          @relation(fields: [passageId], references: [id], onDelete: Restrict)
+  representations       SourceQuestionRepresentation[]
+  answerKeyItems        AnswerKeyItem[]
+  bookletMappings       BookletQuestionMapping[]
+  attemptResponses      AttemptResponse[]
+
+  @@unique([paperId, id], name: "uk_paper_occurrence_composite")
+  @@unique([paperId, sequenceNumber], name: "uk_occurrence_paper_seq")
+  @@map("paper_question_occurrences")
+}
+
+model SourceQuestionRepresentation {
+  id                 String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  occurrenceId       String                  @map("occurrence_id") @db.Uuid
+  languageCode       LanguageCode            @map("language_code")
+  questionText       String                  @map("question_text") @db.Text
+  isOriginalLanguage Boolean                 @default(true) @map("is_original_language")
+  editorialVerified  Boolean                 @default(false) @map("editorial_verified")
+  explanationText    String?                 @map("explanation_text") @db.Text
+  createdAt          DateTime                @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime                @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  occurrence         PaperQuestionOccurrence @relation(fields: [occurrenceId], references: [id], onDelete: Restrict)
+  options            QuestionOption[]
+
+  @@unique([occurrenceId, id], name: "uk_rep_occurrence_composite")
+  @@unique([occurrenceId, languageCode], name: "uk_representation_occurrence_lang")
+  @@map("source_question_representations")
+}
+
+model QuestionOption {
+  id               String                       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  representationId String                       @map("representation_id") @db.Uuid
+  optionLabel      String                       @map("option_label") @db.VarChar(10)
+  optionText       String                       @map("option_text") @db.Text
+  sortOrder        Int                          @map("sort_order")
+  explanationText  String?                      @map("explanation_text") @db.Text
+  conceptId        String?                      @map("concept_id") @db.Uuid
+  createdAt        DateTime                     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime                     @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  representation   SourceQuestionRepresentation @relation(fields: [representationId], references: [id], onDelete: Restrict)
+  concept          DetailedConcept?             @relation(fields: [conceptId], references: [id], onDelete: SetNull)
+  bookletMappings  BookletOptionMapping[]
+
+  @@unique([representationId, id], name: "uk_opt_rep_composite")
+  @@unique([representationId, optionLabel], name: "uk_option_rep_label")
+  @@unique([representationId, sortOrder], name: "uk_option_rep_order")
+  @@map("question_options")
+}
+
+model DetailedConcept {
+  id           String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title        String           @db.VarChar(255)
+  content      String           @db.Text
+  keyPoints    String[]         @default([]) @map("key_points")
+  imageUrl     String?          @map("image_url") @db.VarChar(1000)
+  imageAlt     String?          @map("image_alt") @db.VarChar(255)
+  imageCaption String?          @map("image_caption") @db.VarChar(500)
+  videoUrl     String?          @map("video_url") @db.VarChar(1000)
+  videoTitle   String?          @map("video_title") @db.VarChar(255)
+  references   Json             @default("[]")
+  createdAt    DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime         @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  options      QuestionOption[]
+
+  @@map("detailed_concepts")
+}
+
+// ----------------------------------------------------------------------------
+// 5. Answer Key Versioning & Official Publication Ledger
+// ----------------------------------------------------------------------------
+
+model AnswerKeyVersion {
+  id            String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  paperId       String                    @map("paper_id") @db.Uuid
+  versionNumber Int                       @map("version_number")
+  versionTag    String                    @map("version_tag") @db.VarChar(50)
+  isOfficial    Boolean                   @default(true) @map("is_official")
+  effectiveFrom DateTime                  @default(now()) @map("effective_from") @db.Timestamptz(6)
+  releasedAt    DateTime?                 @map("released_at") @db.Timestamptz(6)
+  releaseNotes  String?                   @map("release_notes") @db.Text
+  createdAt     DateTime                  @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  paper         ExamPaper                 @relation(fields: [paperId], references: [id], onDelete: Restrict)
+  items         AnswerKeyItem[]
+  evaluations   AttemptEvaluationRecord[]
+
+  @@unique([paperId, id], name: "uk_answer_key_paper_composite")
+  @@unique([paperId, versionNumber], name: "uk_answer_key_paper_version")
+  @@map("answer_key_versions")
+}
+
+model AnswerKeyItem {
+  id                    String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  paperId               String                  @map("paper_id") @db.Uuid
+  keyVersionId          String                  @map("key_version_id") @db.Uuid
+  occurrenceId          String                  @map("occurrence_id") @db.Uuid
+  keyStatus             KeyStatus               @default(ACTIVE) @map("key_status")
+  correctOptionLabels   String[]                @map("correct_option_labels") @db.VarChar(10)
+  numericalTargetValue  Decimal?                @map("numerical_target_value") @db.Decimal(10, 4)
+  numericalTolerance    Decimal?                @map("numerical_tolerance") @db.Decimal(10, 4)
+  withdrawalPolicy      WithdrawalPolicy?       @map("withdrawal_policy")
+  adjudicationRationale String?                 @map("adjudication_rationale") @db.Text
+  createdAt             DateTime                @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  paper                 ExamPaper               @relation(fields: [paperId], references: [id], onDelete: Restrict)
+  keyVersion            AnswerKeyVersion        @relation(fields: [paperId, keyVersionId], references: [paperId, id], onDelete: Restrict)
+  occurrence            PaperQuestionOccurrence @relation(fields: [paperId, occurrenceId], references: [paperId, id], onDelete: Restrict)
+
+  @@unique([keyVersionId, occurrenceId], name: "uk_key_item_version_occurrence")
+  @@map("answer_key_items")
+}
+
+// ----------------------------------------------------------------------------
+// 6. Marking Scheme & Section Scoring Hierarchy
+// ----------------------------------------------------------------------------
+
+model PaperMarkingScheme {
+  id                    String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  paperId               String    @unique @map("paper_id") @db.Uuid
+  marksPerCorrect       Decimal   @map("marks_per_correct") @db.Decimal(6, 3)
+  negativeMarksPerWrong Decimal   @map("negative_marks_per_wrong") @db.Decimal(6, 3)
+  partialMarkingAllowed Boolean   @default(false) @map("partial_marking_allowed")
+  createdAt             DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt             DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  paper                 ExamPaper @relation(fields: [paperId], references: [id], onDelete: Restrict)
+
+  @@map("paper_marking_schemes")
+}
+
+model SectionScoringOverride {
+  id                    String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sectionId             String       @unique @map("section_id") @db.Uuid
+  marksPerCorrect       Decimal      @map("marks_per_correct") @db.Decimal(6, 3)
+  negativeMarksPerWrong Decimal      @map("negative_marks_per_wrong") @db.Decimal(6, 3)
+  createdAt             DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt             DateTime     @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  section               PaperSection @relation(fields: [sectionId], references: [id], onDelete: Restrict)
+
+  @@map("section_scoring_overrides")
+}
+
+// ----------------------------------------------------------------------------
+// 7. Booklet Series & Permutation Mapping (Hardened Cross-Paper Keys)
+// ----------------------------------------------------------------------------
+
+model BookletSeries {
+  id             String                   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  paperId        String                   @map("paper_id") @db.Uuid
+  seriesCode     String                   @map("series_code") @db.VarChar(10)
+  isMasterSeries Boolean                  @default(false) @map("is_master_series")
+  createdAt      DateTime                 @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  paper          ExamPaper                @relation(fields: [paperId], references: [id], onDelete: Restrict)
+  questionMappings BookletQuestionMapping[]
+  attempts       TestAttempt[]
+
+  @@unique([paperId, id], name: "uk_booklet_series_composite")
+  @@unique([paperId, seriesCode], name: "uk_booklet_paper_series")
+  @@map("booklet_series")
+}
+
+model BookletQuestionMapping {
+  id              String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  paperId         String                  @map("paper_id") @db.Uuid
+  bookletSeriesId String                  @map("booklet_series_id") @db.Uuid
+  occurrenceId    String                  @map("occurrence_id") @db.Uuid
+  displaySequence Int                     @map("display_sequence")
+  createdAt       DateTime                @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  paper           ExamPaper               @relation(fields: [paperId], references: [id], onDelete: Restrict)
+  bookletSeries   BookletSeries           @relation(fields: [paperId, bookletSeriesId], references: [paperId, id], onDelete: Restrict)
+  occurrence      PaperQuestionOccurrence @relation(fields: [paperId, occurrenceId], references: [paperId, id], onDelete: Restrict)
+  optionMappings  BookletOptionMapping[]
+
+  @@unique([bookletSeriesId, displaySequence], name: "uk_booklet_q_seq")
+  @@unique([bookletSeriesId, occurrenceId], name: "uk_booklet_q_occurrence")
+  @@map("booklet_question_mappings")
+}
+
+model BookletOptionMapping {
+  id                String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  questionMappingId String                 @map("question_mapping_id") @db.Uuid
+  sourceOptionId    String                 @map("source_option_id") @db.Uuid
+  displayLabel      String                 @map("display_label") @db.VarChar(10)
+  displaySortOrder  Int                    @map("display_sort_order")
+  createdAt         DateTime               @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  questionMapping   BookletQuestionMapping @relation(fields: [questionMappingId], references: [id], onDelete: Restrict)
+  sourceOption      QuestionOption         @relation(fields: [sourceOptionId], references: [id], onDelete: Restrict)
+
+  @@unique([questionMappingId, displayLabel], name: "uk_booklet_opt_label")
+  @@unique([questionMappingId, displaySortOrder], name: "uk_booklet_opt_order")
+  @@unique([questionMappingId, sourceOptionId], name: "uk_booklet_opt_source")
+  @@map("booklet_option_mappings")
+}
+
+// ----------------------------------------------------------------------------
+// 8. Test Attempts, Responses & Two-Tier Evaluation Ledger (Hardened)
+// ----------------------------------------------------------------------------
+
+model TestAttempt {
+  id               String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  paperId          String                    @map("paper_id") @db.Uuid
+  bookletSeriesId  String                    @map("booklet_series_id") @db.Uuid
+  userId           String?                   @map("user_id") @db.Uuid
+  attemptStatus    AttemptStatus             @default(IN_PROGRESS) @map("attempt_status")
+  startedAt        DateTime                  @default(now()) @map("started_at") @db.Timestamptz(6)
+  expiresAt        DateTime?                 @map("expires_at") @db.Timestamptz(6)
+  submittedAt      DateTime?                 @map("submitted_at") @db.Timestamptz(6)
+  timeSpentSeconds Int                       @default(0) @map("time_spent_seconds")
+  ipAddress        String?                   @map("ip_address") @db.VarChar(45)
+  userAgent        String?                   @map("user_agent") @db.VarChar(500)
+  createdAt        DateTime                  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime                  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  paper            ExamPaper                 @relation(fields: [paperId], references: [id], onDelete: Restrict)
+  bookletSeries    BookletSeries             @relation(fields: [paperId, bookletSeriesId], references: [paperId, id], onDelete: Restrict)
+  user             User?                     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  responses        AttemptResponse[]
+  evaluations      AttemptEvaluationRecord[]
+
+  @@unique([paperId, id], name: "uk_attempt_paper_composite")
+  @@map("test_attempts")
+}
+
+model AttemptResponse {
+  id                      String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  paperId                 String                  @map("paper_id") @db.Uuid
+  attemptId               String                  @map("attempt_id") @db.Uuid
+  occurrenceId            String                  @map("occurrence_id") @db.Uuid
+  selectedSourceOptionIds String[]                @map("selected_source_option_ids") @db.Uuid
+  displayOptionLabels     String[]                @map("display_option_labels") @db.VarChar(10)
+  numericalInput          Decimal?                @map("numerical_input") @db.Decimal(10, 4)
+  isMarkedForReview       Boolean                 @default(false) @map("is_marked_for_review")
+  timeSpentSeconds        Int                     @default(0) @map("time_spent_seconds")
+  version                 Int                     @default(1)
+  answeredAt              DateTime?               @map("answered_at") @db.Timestamptz(6)
+
+  paper                   ExamPaper               @relation(fields: [paperId], references: [id], onDelete: Restrict)
+  attempt                 TestAttempt             @relation(fields: [paperId, attemptId], references: [paperId, id], onDelete: Cascade)
+  occurrence              PaperQuestionOccurrence @relation(fields: [paperId, occurrenceId], references: [paperId, id], onDelete: Restrict)
+
+  @@unique([attemptId, occurrenceId], name: "uk_response_attempt_occurrence")
+  @@map("attempt_responses")
+}
+
+model AttemptEvaluationRecord {
+  id                   String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  attemptId            String           @map("attempt_id") @db.Uuid
+  keyVersionId         String           @map("key_version_id") @db.Uuid
+  evaluationVersion    Int              @map("evaluation_version")
+  isCurrentActive      Boolean          @default(true) @map("is_current_active")
+  isOriginalAttempt    Boolean          @default(false) @map("is_original_attempt")
+  rawScore             Decimal          @map("raw_score") @db.Decimal(8, 3)
+  evaluatedDenominator Decimal          @map("evaluated_denominator") @db.Decimal(8, 3)
+  totalCorrect         Int              @map("total_correct")
+  totalWrong           Int              @map("total_wrong")
+  totalUnanswered      Int              @map("total_unanswered")
+  perQuestionScoreJson Json             @map("per_question_score_json")
+  adjudicationReason   String?          @map("adjudication_reason") @db.Text
+  evaluatedAt          DateTime         @default(now()) @map("evaluated_at") @db.Timestamptz(6)
+
+  attempt              TestAttempt      @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  keyVersion           AnswerKeyVersion @relation(fields: [keyVersionId], references: [id], onDelete: Restrict)
+
+  @@unique([attemptId, evaluationVersion], name: "uk_attempt_eval_version")
+  @@map("attempt_evaluations")
+}

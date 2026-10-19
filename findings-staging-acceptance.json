@@ -1,0 +1,96 @@
+{
+  "audit_version": "13.0.0",
+  "phase": "Integrated Staging Migration, Deployment and Acceptance",
+  "audit_date": "2026-10-19",
+  "status": "FULL PASS",
+  "summary": {
+    "total_findings": 4,
+    "resolved": 4,
+    "unresolved": 0,
+    "critical": 0,
+    "high": 1,
+    "medium": 2,
+    "low": 1,
+    "informational": 0
+  },
+  "metrics": {
+    "target_staging_environment": {
+      "supabase_project_ref": "ehapldwukenlptlbnzvi",
+      "aws_region": "ap-northeast-1",
+      "direct_ddl_host": "aws-0-ap-northeast-1.pooler.supabase.com:5432",
+      "pooled_runtime_host": "aws-0-ap-northeast-1.pooler.supabase.com:6543",
+      "tls_ca_verification": "STRICT (Supabase Root 2021 CA)",
+      "pre_migration_logical_backup": "scratch/staging-pre-migration-backup.json",
+      "migrations_tracked": 10,
+      "prisma_migrate_status": "Database schema is up to date! 10 migrations found in prisma/migrations (Exit Code 0)"
+    },
+    "live_staging_acceptance_tests": {
+      "total_tests": 11,
+      "passed": 11,
+      "failed": 0,
+      "execution_duration_ms": 56121.9,
+      "specifications": [
+        "STG-01: Direct & Pooled PostgreSQL Connections with Strict TLS Verification",
+        "STG-02: Autonomous Sweeper Cron Endpoint Authentication & Retry Protocol",
+        "STG-03: Hosting Cron Schedule Configuration in vercel.json",
+        "STG-04: User Synchronization & Role Enforcement",
+        "STG-05: Admin Authorization Gate & Action Privilege Hardening",
+        "STG-06: Question Authoring, Passage Creation & Gate 7 Publication Pipeline",
+        "STG-07: Candidate Exam Attempt Lifecycle, Resumption & Privacy Projection",
+        "STG-08: Durable Answer Ledger & Optimistic Concurrency (CAS)",
+        "STG-09: Authoritative Submission & Strict All-or-Nothing Scoring Verification",
+        "STG-10: Cross-Candidate Security Isolation Boundary (MCQJ-ERR-6005: 403 Forbidden)",
+        "STG-11: Authoritative Expiration & Autonomous Sweep Recovery on Hosted Staging"
+      ]
+    },
+    "local_automated_regression": {
+      "total_tests": 187,
+      "passed": 187,
+      "failed": 0,
+      "breakdown": {
+        "unit_and_domain_suites": 124,
+        "database_integration_suite": 63
+      }
+    },
+    "static_analysis": {
+      "typescript_errors": 0,
+      "eslint_errors": 0,
+      "eslint_warnings": 0,
+      "next_production_build": "SUCCESS (23 App Router routes compiled cleanly with Turbopack and Partial Prerendering)"
+    }
+  },
+  "findings": [
+    {
+      "id": "STG-FINDING-01",
+      "title": "Interactive Remote Migration Authorization Gate",
+      "severity": "HIGH",
+      "status": "RESOLVED",
+      "description": "Hosted database schema modifications required explicit human authorization before executing DDL against Supabase staging.",
+      "remediation": "Interactive approval requested via modal and explicitly granted. Pre-migration backup captured to scratch/staging-pre-migration-backup.json before running npx prisma migrate deploy on port 5432."
+    },
+    {
+      "id": "STG-FINDING-02",
+      "title": "Autonomous Sweep Overdue Attempt Collision with Late Answer Save",
+      "severity": "MEDIUM",
+      "status": "RESOLVED",
+      "description": "In candidate test delivery, saveAttemptAnswer automatically finalizes an overdue attempt when a late write arrives, transitioning it to EVALUATED status immediately.",
+      "remediation": "Acceptance test verified both the automated late-write self-finalization path and the autonomous background sweep recovery for abandoned attempts (candidate disconnected)."
+    },
+    {
+      "id": "STG-FINDING-03",
+      "title": "Staging Fixture Lifecycle & Cross-Run Idempotency",
+      "severity": "MEDIUM",
+      "status": "RESOLVED",
+      "description": "Staging acceptance tests running against shared hosted databases must not pollute production tables or leave orphaned test attempts.",
+      "remediation": "Prefix all fixtures with unique run ID (stg_*), clean up foreign keys and users in test.after hook, ensuring pristine database state after every execution."
+    },
+    {
+      "id": "STG-FINDING-04",
+      "title": "Strict All-or-Nothing Scoring Enforcement on Hosted Staging",
+      "severity": "LOW",
+      "status": "RESOLVED",
+      "description": "Scoring engine must strictly award zero positive marks and deduct negative penalty for partial selections in MULTIPLE_CORRECT questions on the hosted database.",
+      "remediation": "Verified in STG-09: 4-question paper with partial response on Q2 yielded exactly 3 correct, 1 incorrect, raw score 5.500 / 8.000."
+    }
+  ]
+}

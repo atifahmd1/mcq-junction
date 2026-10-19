@@ -1,0 +1,140 @@
+{
+  "version": "4.1.0",
+  "phase": "Phase 4 Module 1: Application Service Layer, Authorization Hardening & Admin Workflow Foundation",
+  "audit_date": "2026-10-12",
+  "status": "PASS WITH DOCUMENTED LIMITATIONS",
+  "summary": {
+    "total_findings": 5,
+    "critical": 0,
+    "high": 2,
+    "medium": 2,
+    "low": 0,
+    "informational": 1,
+    "resolved": 5,
+    "unresolved_runtime_recommendations": 0
+  },
+  "metrics": {
+    "unit_tests_passing": 23,
+    "database_integration_tests_passing": 19,
+    "total_tests_passing": 42,
+    "test_duration_ms": 4080,
+    "typescript_clean": true,
+    "eslint_clean": true,
+    "next_build_clean": true,
+    "remote_supabase_mutated": false,
+    "env_local_modified": false
+  },
+  "findings": [
+    {
+      "finding_id": "PH4-M1-F01",
+      "title": "Privileged RPC PostgREST Exposure Closure via Forward Migration",
+      "severity": "HIGH",
+      "classification": "Confirmed and remediated",
+      "affected_files": [
+        "prisma/migrations/20261012140000_revoke_authenticated_privileged_rpc/migration.sql",
+        "scripts/bootstrap-test-db.mjs"
+      ],
+      "affected_functions": [
+        "fn_publish_exam_paper",
+        "fn_reevaluate_paper_attempts"
+      ],
+      "evidence": "PostgreSQL default grants allow EXECUTE on functions created in public schema to PUBLIC/authenticated unless explicitly revoked. In Supabase, this exposes administrative stored procedures to HTTP POST /rest/v1/rpc/*.",
+      "exploitability_impact": "High. Any authenticated student possessing a valid JWT could directly invoke fn_publish_exam_paper or fn_reevaluate_paper_attempts over HTTP PostgREST API.",
+      "before_behavior": "Privilege catalog allowed authenticated role to execute fn_publish_exam_paper and fn_reevaluate_paper_attempts, relying solely on internal SQL Gate 0 logic.",
+      "after_behavior": "Explicit forward-only migration REVOKE EXECUTE ON FUNCTION ... FROM PUBLIC, anon, authenticated; GRANT EXECUTE TO service_role, postgres; catalog verification guarantees 0 grants.",
+      "remediation": "Created migration 20261012140000_revoke_authenticated_privileged_rpc and added test DB-19 in tests/database.test.mjs.",
+      "test_references": [
+        "tests/database.test.mjs: DB-19 (19.1 Catalog Verification, 19.2 Permission Denied for authenticated, 19.3 Re-evaluation Permission Denied, 19.4 Direct postgres Success)"
+      ],
+      "residual_risk": "None in database kernel. Live Supabase project requires migration deployment in Phase 5 release gate."
+    },
+    {
+      "finding_id": "PH4-M1-F02",
+      "title": "Server-Side Administrative Session Guard with Account Suspension Enforcement",
+      "severity": "HIGH",
+      "classification": "Confirmed and remediated",
+      "affected_files": [
+        "src/lib/auth/session.ts"
+      ],
+      "affected_functions": [
+        "assertAdminSession"
+      ],
+      "evidence": "Application service layers must not rely on unverified client headers or JWT claims alone. Server-side operations required strict JWT signature verification via supabase.auth.getUser(), ban/suspension enforcement via user.banned_until, and authoritative public.users role checking.",
+      "exploitability_impact": "High. Banned, suspended, or demoted users could execute administrative functions if role caching or client claims were trusted.",
+      "before_behavior": "No centralized typed administrative session guard existed in application layer prior to Phase 4 Module 1.",
+      "after_behavior": "assertAdminSession() cryptographically verifies session, rejects anonymous sessions, enforces banned_until and deleted_at, queries public.users table, and strictly checks dbUser.role === Role.ADMIN, failing closed with typed UnauthorizedError (401) and ForbiddenError (403).",
+      "remediation": "Implemented assertAdminSession() in src/lib/auth/session.ts and verified across 7 discrete unit test scenarios.",
+      "test_references": [
+        "tests/admin-service.test.mjs: assertAdminSession test suite (7 tests)"
+      ],
+      "residual_risk": "None in application layer."
+    },
+    {
+      "finding_id": "PH4-M1-F03",
+      "title": "Strict Input Validation Boundary & RFC 4122 v4 UUID Validation",
+      "severity": "MEDIUM",
+      "classification": "Confirmed and remediated",
+      "affected_files": [
+        "src/lib/admin/schemas.ts"
+      ],
+      "affected_schemas": [
+        "publishPaperSchema",
+        "reevaluatePaperSchema"
+      ],
+      "evidence": "Administrative Server Actions receiving client arguments could pass malformed strings or SQL injection probes to database drivers without schema validation.",
+      "exploitability_impact": "Medium. Unvalidated inputs could cause unhandled driver exceptions, logging pollution, or unexpected database state.",
+      "before_behavior": "No formal validation schemas for administrative actions existed.",
+      "after_behavior": "Zod schemas enforce trimmed RFC 4122 v4 UUID strings and minimum character length on adjudication reasons before database execution.",
+      "remediation": "Created src/lib/admin/schemas.ts and verified via unit tests.",
+      "test_references": [
+        "tests/admin-service.test.mjs: publishPaperSchema & reevaluatePaperSchema tests"
+      ],
+      "residual_risk": "None."
+    },
+    {
+      "finding_id": "PH4-M1-F04",
+      "title": "Administrative Application Service & Safe Domain Error Sanitization",
+      "severity": "MEDIUM",
+      "classification": "Confirmed and remediated",
+      "affected_files": [
+        "src/lib/admin/service.ts"
+      ],
+      "affected_functions": [
+        "publishExamPaper",
+        "reevaluatePaperAttempts",
+        "mapDatabaseDomainError"
+      ],
+      "evidence": "Direct database error messages from PostgreSQL can leak internal table names, constraint details, hostnames, or credentials to end users.",
+      "exploitability_impact": "Medium. Information disclosure of database internals or sensitive error messages.",
+      "before_behavior": "No centralized service or error sanitizer existed for exam paper administrative operations.",
+      "after_behavior": "publishExamPaper and reevaluatePaperAttempts invoke stored procedures via parameterized queries with explicit verified admin UUIDs; mapDatabaseDomainError parses MCQJ-ERR-* domain codes into client-safe messages while masking all internal SQL and credentials under 500 status.",
+      "remediation": "Implemented src/lib/admin/service.ts with AdminServiceError and mapDatabaseDomainError; tested against domain error codes and sensitive error masking.",
+      "test_references": [
+        "tests/admin-service.test.mjs: mapDatabaseDomainError, publishExamPaper, and reevaluatePaperAttempts tests"
+      ],
+      "residual_risk": "None."
+    },
+    {
+      "finding_id": "PH4-M1-F05",
+      "title": "Administrative Server Actions with Structured Responses & Cache Invalidation",
+      "severity": "INFORMATIONAL",
+      "classification": "Confirmed and remediated",
+      "affected_files": [
+        "src/app/admin/actions.ts"
+      ],
+      "affected_functions": [
+        "publishExamPaperAction",
+        "reevaluatePaperAttemptsAction"
+      ],
+      "evidence": "Next.js App Router forms and admin management dashboards require safe Server Actions returning structured { success, data, error } responses and invalidating Next.js cache paths upon successful state mutations.",
+      "exploitability_impact": "Low / Informational. Architecture foundation for administrative UI.",
+      "before_behavior": "No server actions existed for administrative workflows.",
+      "after_behavior": "Created publishExamPaperAction and reevaluatePaperAttemptsAction with revalidatePath('/admin/papers') and typed error handling.",
+      "remediation": "Implemented src/app/admin/actions.ts and verified via next build and TypeScript typecheck.",
+      "test_references": [
+        "next build compilation and static page generation"
+      ],
+      "residual_risk": "None. Ready for Phase 4 Module 2 UI integration."
+    }
+  ]
+}

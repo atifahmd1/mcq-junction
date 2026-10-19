@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MCQ Junction — Phase 11: Staging Readiness, Security Closure & Operational Runbook Report</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      mermaid.initialize({ startOnLoad: true, theme: "dark" });
+    });
+  </script>
+  <style>
+    :root {
+      --bg: #09090b;
+      --card-bg: #18181b;
+      --border: #27272a;
+      --text: #f4f4f5;
+      --text-muted: #a1a1aa;
+      --indigo: #6366f1;
+      --indigo-bg: rgba(99, 102, 241, 0.12);
+      --purple: #a855f7;
+      --purple-bg: rgba(168, 85, 247, 0.12);
+      --emerald: #10b981;
+      --emerald-bg: rgba(16, 185, 129, 0.12);
+      --amber: #f59e0b;
+      --amber-bg: rgba(245, 158, 11, 0.12);
+      --red: #ef4444;
+      --red-bg: rgba(239, 68, 68, 0.12);
+      --blue: #3b82f6;
+      --blue-bg: rgba(59, 130, 246, 0.12);
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      margin: 0;
+      padding: 2.5rem 1.5rem;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    header {
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 2rem;
+      margin-bottom: 2.5rem;
+    }
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .badge-pass {
+      background: var(--emerald-bg);
+      color: var(--emerald);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .badge-amber {
+      background: var(--amber-bg);
+      color: var(--amber);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+    .badge-indigo {
+      background: var(--indigo-bg);
+      color: var(--indigo);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+    }
+    .badge-purple {
+      background: var(--purple-bg);
+      color: var(--purple);
+      border: 1px solid rgba(168, 85, 247, 0.3);
+    }
+    h1 {
+      font-size: 2.25rem;
+      font-weight: 800;
+      margin: 1rem 0 0.5rem 0;
+      letter-spacing: -0.025em;
+    }
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      margin-bottom: 1.5rem;
+    }
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+    .meta-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1rem 1.25rem;
+    }
+    .meta-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
+      margin-bottom: 0.25rem;
+    }
+    .meta-value {
+      font-size: 1.15rem;
+      font-weight: 700;
+    }
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin: 2.5rem 0 1.25rem 0;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.75rem;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      background: var(--card-bg);
+      border-radius: 0.75rem;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    th, td {
+      padding: 0.85rem 1.25rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    th {
+      background: rgba(255, 255, 255, 0.03);
+      font-weight: 600;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+    }
+    tr:last-child td {
+      border-bottom: none;
+    }
+    .diagram-container {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      text-align: center;
+    }
+    .code-block {
+      background: #000;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      padding: 1rem 1.25rem;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.85rem;
+      color: #e4e4e7;
+      overflow-x: auto;
+      margin: 1rem 0;
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.25rem 1.5rem;
+      margin: 1rem 0;
+    }
+    .checklist {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .checklist li {
+      padding: 0.5rem 0;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .checklist li:last-child {
+      border-bottom: none;
+    }
+    .check-icon {
+      color: var(--emerald);
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
+        <span class="badge badge-amber">Verdict: PASS WITH DOCUMENTED LIMITATIONS</span>
+        <span class="badge badge-indigo">Phase 11 Staging Readiness</span>
+        <span class="badge badge-purple">Zero Remote Mutation</span>
+      </div>
+      <h1>MCQ Junction — Phase 11 Staging Readiness & Security Closure Report</h1>
+      <div class="subtitle">Controlled Staging Assurance, Deadline Authority, Concurrency Hardening & Operational Runbook</div>
+      
+      <div class="meta-grid">
+        <div class="meta-card">
+          <div class="meta-label">Total Verified Tests</div>
+          <div class="meta-value" style="color: var(--emerald);">194 / 194 Passed (100%)</div>
+        </div>
+        <div class="meta-card">
+          <div class="meta-label">PostgreSQL Exam DB Specs</div>
+          <div class="meta-value" style="color: var(--indigo);">20 / 20 Specs (Sweeps & CAS)</div>
+        </div>
+        <div class="meta-card">
+          <div class="meta-label">Browser E2E Lifecycle</div>
+          <div class="meta-value" style="color: var(--purple);">14 / 14 Specs Passed</div>
+        </div>
+        <div class="meta-card">
+          <div class="meta-label">Production Build</div>
+          <div class="meta-value" style="color: var(--emerald);">21 Routes Compiled (Turbopack)</div>
+        </div>
+      </div>
+    </header>
+
+    <div class="section-title">1. Executive Summary & Verdict</div>
+    <p>
+      Phase 11 completes the operational readiness, security verification, and release packaging for staging release. 
+      The examination engine and candidate lifecycle were verified against local disposable PostgreSQL 16 containers, 
+      Playwright Chromium browser instances, static typecheck, linter, and credential scanners.
+    </p>
+
+    <div class="diagram-container">
+      <div class="mermaid">
+        flowchart LR
+          subgraph Local["Local Verification (100% Green)"]
+            T1["124 Unit/Domain Tests"]
+            T2["56 PostgreSQL Integration Tests"]
+            T3["14 Browser E2E Specs"]
+            T4["21 App Router Routes"]
+            T1 & T2 & T3 & T4 --> V1["Local Release Assurance: PASS"]
+          end
+          subgraph Staging["Controlled Staging Deployment (Human Authorization)"]
+            V1 --> S1["Set Staging Environment Variables"]
+            S1 --> S2["npx prisma migrate deploy (Port 5432)"]
+            S2 --> S3["Vercel / Hosting Provider Deploy"]
+            S3 --> S4["Live Staging Smoke Tests"]
+          end
+      </div>
+    </div>
+
+    <div class="section-title">2. Gate 1 — Deadline Authority & Recovery Architecture</div>
+    <p>
+      A key invariant of MCQ Junction is the strict separation between the candidate's answer-save deadline 
+      and background worker sweeps:
+    </p>
+
+    <div class="card">
+      <h3 style="margin-top: 0; color: var(--indigo);">Three Distinct Timing Authorities</h3>
+      <ol style="margin-bottom: 0; padding-left: 1.25rem;">
+        <li style="margin-bottom: 0.5rem;">
+          <strong>Authoritative Answer-Save Deadline (<code>expires_at</code>):</strong> 
+          Enforced server-side on every <code>saveAttemptAnswer()</code> call. 
+          No candidate answer can ever be persisted once <code>now() > expires_at</code>, regardless of sweep timing or client clock drift. 
+          Late answer mutations trigger auto-finalization and fail closed with <code>MCQJ-ERR-6003</code> (403 Forbidden).
+        </li>
+        <li style="margin-bottom: 0.5rem;">
+          <strong>Sweep Scheduling Tolerance:</strong> 
+          <code>finalizeOverdueAttempts()</code> executes autonomously (every 60s or on-demand). 
+          Whether the sweep runs immediately or 2 hours late, candidate answer saves remain completely blocked by the deadline check. 
+          Verified idempotent via <code>DB-EXAM-16</code> and <code>DB-EXAM-18</code>.
+        </li>
+        <li>
+          <strong>Finalization / Evaluation Timestamp:</strong> 
+          <code>answeredAt</code> records when individual questions were answered before the deadline; 
+          <code>evaluatedAt</code> records when the scoring engine evaluated the attempt.
+        </li>
+      </ol>
+    </div>
+
+    <div class="section-title">3. Comprehensive Release Verification Matrix</div>
+    <table>
+      <thead>
+        <tr>
+          <th>Verification Dimension</th>
+          <th>Target / Scope</th>
+          <th>Result</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Unit & Scoring Test Suites</strong></td>
+          <td>12 Suites: Auth, Scoring, Headers, Admin, Types, Shuffling</td>
+          <td><strong>124 / 124 Specs Passed</strong> (7.7s)</td>
+          <td><span class="badge badge-pass">PASS</span></td>
+        </tr>
+        <tr>
+          <td><strong>PostgreSQL Exam Database Suite</strong></td>
+          <td>Start, resume, CAS, expiry, concurrent saves, sweeps</td>
+          <td><strong>20 / 20 Specs Passed</strong> (6.4s)</td>
+          <td><span class="badge badge-pass">PASS</span></td>
+        </tr>
+        <tr>
+          <td><strong>PostgreSQL Core Domain Suite</strong></td>
+          <td>Immutability, relational integrity, publication gates</td>
+          <td><strong>19 / 19 Specs Passed</strong> (4.9s)</td>
+          <td><span class="badge badge-pass">PASS</span></td>
+        </tr>
+        <tr>
+          <td><strong>PostgreSQL Workflow Suite</strong></td>
+          <td>Admin publication, reordering, two-tier ledger</td>
+          <td><strong>10 / 10 Specs Passed</strong> (2.8s)</td>
+          <td><span class="badge badge-pass">PASS</span></td>
+        </tr>
+        <tr>
+          <td><strong>PostgreSQL Passage Suite</strong></td>
+          <td>Multi-language passage linking & Gate 7 checks</td>
+          <td><strong>7 / 7 Specs Passed</strong> (1.1s)</td>
+          <td><span class="badge badge-pass">PASS</span></td>
+        </tr>
+        <tr>
+          <td><strong>Browser Lifecycle E2E Suite</strong></td>
+          <td>Playwright Chromium: 14 E2E lifecycle specifications</td>
+          <td><strong>14 / 14 Specs Passed</strong> (32.8s)</td>
+          <td><span class="badge badge-pass">PASS</span></td>
+        </tr>
+        <tr>
+          <td><strong>Visual Evidence Artifacts</strong></td>
+          <td>High-resolution UI screenshots of all lifecycle stages</td>
+          <td><strong>13 Artifacts Captured & Verified</strong></td>
+          <td><span class="badge badge-pass">PASS</span></td>
+        </tr>
+        <tr>
+          <td><strong>Static Type Safety</strong></td>
+          <td>Entire Codebase (<code>tsc --noEmit</code>)</td>
+          <td><strong>0 Errors</strong></td>
+          <td><span class="badge badge-pass">PASS</span></td>
+        </tr>
+        <tr>
+          <td><strong>Linter & Code Standards</strong></td>
+          <td>ESLint 9 (<code>next/core-web-vitals</code> + React 19)</td>
+          <td><strong>0 Errors, 0 Warnings</strong></td>
+          <td><span class="badge badge-pass">PASS</span></td>
+        </tr>
+        <tr>
+          <td><strong>Production Build</strong></td>
+          <td>Next.js 16.4.0 Turbopack (<code>next build</code>)</td>
+          <td><strong>21 Routes Compiled (0 Errors)</strong></td>
+          <td><span class="badge badge-pass">PASS</span></td>
+        </tr>
+        <tr>
+          <td><strong>Preflight Staging Audit</strong></td>
+          <td>10 Sequential migrations, schema validation, safety</td>
+          <td><strong>Exit Code 0 (All Valid)</strong></td>
+          <td><span class="badge badge-pass">PASS</span></td>
+        </tr>
+        <tr>
+          <td><strong>Secret & Credential Scan</strong></td>
+          <td>Pattern matching against all tracked and untracked files</td>
+          <td><strong>0 Secrets / Tokens Committed</strong></td>
+          <td><span class="badge badge-pass">PASS</span></td>
+        </tr>
+        <tr>
+          <td><strong>Total Automated Tests</strong></td>
+          <td>All verified unit, database, and browser specs</td>
+          <td><strong>194 / 194 Passed (100% Green)</strong></td>
+          <td><span class="badge badge-pass">PASS</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="section-title">4. Operational Runbook Summary (<a href="../deployment/STAGING_RUNBOOK.md" style="color: var(--indigo);">STAGING_RUNBOOK.md</a>)</div>
+    <div class="card">
+      <ul class="checklist">
+        <li><span class="check-icon">✔</span> <strong>Environment Variables:</strong> Documented without exposed secrets (Transaction pooler port 6543 vs direct session port 5432).</li>
+        <li><span class="check-icon">✔</span> <strong>Supabase Auth & OAuth:</strong> Strict redirect URL allow-lists and OAuth provider callback configuration.</li>
+        <li><span class="check-icon">✔</span> <strong>Migration Protocol:</strong> Manual step-by-step pre-flight check, deployment command, and post-migration SQL verification.</li>
+        <li><span class="check-icon">✔</span> <strong>Monitoring & Alarms:</strong> Log drain filters and threshold alerts for version conflicts, deadline expirations, and status regressions.</li>
+        <li><span class="check-icon">✔</span> <strong>Incident Response:</strong> Procedures for stuck attempt finalization and emergency application rollbacks.</li>
+      </ul>
+    </div>
+
+    <div class="section-title">5. Staging Release Sign-Off</div>
+    <div class="card">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div>
+          <strong>Final Verdict:</strong> <span class="badge badge-amber">PASS WITH DOCUMENTED LIMITATIONS</span><br/>
+          <span style="color: var(--text-muted); font-size: 0.85rem;">Local validation 100% complete; remote deployment awaiting human authorization.</span>
+        </div>
+        <div style="color: var(--text-muted); font-size: 0.85rem; text-align: right;">
+          Signed-off: Principal Engineer, Database Security Engineer, Assessment Architect & Release Manager
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

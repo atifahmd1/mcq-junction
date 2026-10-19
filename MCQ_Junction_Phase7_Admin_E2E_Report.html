@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MCQ Junction — Phase 7: Admin Verification & First Workflow E2E Report</title>
+  <style>
+    :root {
+      --bg: #09090b;
+      --card-bg: #18181b;
+      --border: #27272a;
+      --text: #f4f4f5;
+      --text-muted: #a1a1aa;
+      --indigo: #6366f1;
+      --indigo-bg: rgba(99, 102, 241, 0.12);
+      --emerald: #10b981;
+      --emerald-bg: rgba(16, 185, 129, 0.12);
+      --amber: #f59e0b;
+      --amber-bg: rgba(245, 158, 11, 0.12);
+      --red: #ef4444;
+      --red-bg: rgba(239, 68, 68, 0.12);
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      margin: 0;
+      padding: 2.5rem 1.5rem;
+    }
+    .container {
+      max-width: 1080px;
+      margin: 0 auto;
+    }
+    header {
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 2rem;
+      margin-bottom: 2.5rem;
+    }
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .badge-pass {
+      background: var(--emerald-bg);
+      color: var(--emerald);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .badge-indigo {
+      background: var(--indigo-bg);
+      color: var(--indigo);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+    }
+    h1 {
+      font-size: 2.25rem;
+      font-weight: 800;
+      margin: 1rem 0 0.5rem;
+      letter-spacing: -0.02em;
+    }
+    .meta {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      margin-top: 0.75rem;
+    }
+    h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-top: 2.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+      color: #fafafa;
+    }
+    h3 {
+      font-size: 1.15rem;
+      font-weight: 600;
+      margin-top: 1.5rem;
+      color: #e4e4e7;
+    }
+    p, li {
+      color: #d4d4d8;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: 0.875rem;
+      background: var(--card-bg);
+      border-radius: 0.75rem;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    th, td {
+      padding: 0.85rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    th {
+      background: #202024;
+      font-weight: 600;
+      color: #f4f4f5;
+    }
+    tr:last-child td {
+      border-bottom: none;
+    }
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.85em;
+      background: #27272a;
+      padding: 0.15rem 0.4rem;
+      border-radius: 0.35rem;
+      color: #e4e4e7;
+    }
+    pre {
+      background: #18181b;
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.25rem;
+      overflow-x: auto;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.825rem;
+      line-height: 1.5;
+      color: #e4e4e7;
+    }
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.25rem;
+    }
+    .card-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+    }
+    .card-value {
+      font-size: 1.85rem;
+      font-weight: 800;
+      margin-top: 0.5rem;
+      color: #fafafa;
+    }
+    .card-desc {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 0.25rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div style="display: flex; gap: 0.5rem; align-items: center;">
+        <span class="badge badge-pass">Final Verdict: PASS</span>
+        <span class="badge badge-indigo">Phase 7 Milestone</span>
+      </div>
+      <h1>MCQ Junction — Phase 7: Admin Verification & First Workflow E2E Report</h1>
+      <div class="meta">
+        <div><strong>Document ID:</strong> MCQJ-PHASE7-ADMIN-E2E-REPORT</div>
+        <div><strong>Date:</strong> October 13, 2026</div>
+        <div><strong>Auditor:</strong> Principal Engineer, QA Lead, AppSec Architect</div>
+        <div><strong>Target App:</strong> http://localhost:3000</div>
+      </div>
+    </header>
+
+    <h2>1. Executive Summary & Verification Metrics</h2>
+    <p>
+      Phase 7 validates administrative login end-to-end, cryptographically confirms the authoritative database role for the development admin identity (<code>atifahmad900@gmail.com</code> with UUID <code>6154d3b6-f309-4e32-a524-e83d471dbdef</code>), and verifies the complete administrative examination workflow lifecycle inside a real Google Chrome browser under Playwright automation.
+    </p>
+
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-title">Browser E2E Specs</div>
+        <div class="card-value" style="color: var(--emerald);">11 / 11</div>
+        <div class="card-desc">100% green Playwright Chromium specifications</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Automated Tests</div>
+        <div class="card-value" style="color: var(--emerald);">98 / 98</div>
+        <div class="card-desc">Unit, Security, DB, Workflows & E2E Specs</div>
+      </div>
+      <div class="card">
+        <div class="card-title">TypeScript & Lint</div>
+        <div class="card-value" style="color: var(--emerald);">0 Errors</div>
+        <div class="card-desc">0 type errors &bull; 0 ESLint warnings</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Visual Evidence</div>
+        <div class="card-value" style="color: var(--indigo);">15 Screenshots</div>
+        <div class="card-desc">Captured full-page visual regression records</div>
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Verification Scope</th>
+          <th>Total Assertions</th>
+          <th>Passed</th>
+          <th>Failed</th>
+          <th>Engine / Target</th>
+          <th>Result Details</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Remote Supabase Identity</strong></td>
+          <td>1 Target Query</td>
+          <td>1</td>
+          <td>0</td>
+          <td>Remote Supabase Pooler (TLS Root CA)</td>
+          <td>UUID <code>6154d3b6-f309-4e32-a524-e83d471dbdef</code>, Role: ADMIN</td>
+        </tr>
+        <tr>
+          <td><strong>Browser E2E Specifications</strong></td>
+          <td>11 Specifications</td>
+          <td>11</td>
+          <td>0</td>
+          <td>Playwright Google Chrome (Headless)</td>
+          <td>Full real-browser login, reorder, gates, 403 boundary</td>
+        </tr>
+        <tr>
+          <td><strong>Unit & Security Suite</strong></td>
+          <td>58 Tests</td>
+          <td>58</td>
+          <td>0</td>
+          <td>Node.js Test Runner</td>
+          <td>Auth validation, scoring, headers, admin, isolation, TLS</td>
+        </tr>
+        <tr>
+          <td><strong>PostgreSQL Integration</strong></td>
+          <td>19 Tests (DB-01..19)</td>
+          <td>19</td>
+          <td>0</td>
+          <td>Docker PostgreSQL 16 (127.0.0.1:5433)</td>
+          <td>Immutability triggers, relational guards, advisory locks</td>
+        </tr>
+        <tr>
+          <td><strong>End-to-End Workflows</strong></td>
+          <td>10 Workflows</td>
+          <td>10</td>
+          <td>0</td>
+          <td>Docker PostgreSQL 16</td>
+          <td>Full multi-step database lifecycle & audit ledger</td>
+        </tr>
+        <tr>
+          <td><strong>Next.js Production Build</strong></td>
+          <td>13 Routes</td>
+          <td>13</td>
+          <td>0</td>
+          <td>Next.js 16.4.0 (Turbopack)</td>
+          <td>Static & Partial Prerendering (PPR) enabled in 17.7s</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>2. Step 1: Admin Login & Session Identity Verification</h2>
+    <p>
+      The authentication contract was verified in two sequential phases: authoritative remote database pre-check and browser-level login.
+    </p>
+
+    <h3>Remote Supabase Identity Pre-Check (Zero Mutation Policy)</h3>
+    <pre>
+Target Database:     aws-0-ap-northeast-1.pooler.supabase.com:5432
+TLS Configuration:   Strict (rejectUnauthorized: true, CA: certs/supabase-root-2021.crt)
+Account Email:       atifahmad900@gmail.com
+Account UUID:        6154d3b6-f309-4e32-a524-e83d471dbdef
+Database Role:       ADMIN
+Suspension Status:   Active (banned_until: NULL, deleted_at: NULL)
+Mutation Policy:     READ-ONLY (Zero remote database mutations executed)</pre>
+
+    <h3>Browser Authentication Execution</h3>
+    <ul>
+      <li><strong>Return Destination:</strong> Browser opened <code>/auth/signin?next=%2Fadmin</code>. Form preserved hidden field <code>next="/admin"</code>.</li>
+      <li><strong>Server Action:</strong> Admin credentials submitted via <code>signInWithEmail</code>. Session cookies established via <code>@supabase/ssr</code>.</li>
+      <li><strong>Deep-Link Navigation:</strong> Browser immediately followed redirect to <code>/admin</code>.</li>
+      <li><strong>Authorization Guard:</strong> <code>assertAdminSession()</code> executed cryptographically against Supabase Auth, queried authoritative <code>public.users</code>, confirmed <code>role === 'ADMIN'</code>, and mounted the administrative dashboard shell.</li>
+    </ul>
+
+    <h2>3. Step 2: Administrative Workflows Verification</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Spec ID</th>
+          <th>Workflow Description</th>
+          <th>Expected Behavior</th>
+          <th>Actual Outcome</th>
+          <th>Verdict</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>SPEC-01</strong></td>
+          <td>Admin Login & Deep-Link</td>
+          <td>Redirects to <code>/admin</code> with session cookie</td>
+          <td>Landed on <code>/admin</code>; cookie <code>sb-127-auth-token</code> issued</td>
+          <td><span class="badge badge-pass">PASS</span></td>
+        </tr>
+        <tr>
+          <td><strong>SPEC-02</strong></td>
+          <td>Authoritative Identity Guard</td>
+          <td>Validates UUID and <code>role = ADMIN</code></td>
+          <td>Header rendered <code>atifahmad900@gmail.com</code> with Verified Administrator</td>
+          <td><span class="badge badge-pass">PASS</span></td>
+        </tr>
+        <tr>
+          <td><strong>SPEC-03</strong></td>
+          <td>Overview Metrics Cards</td>
+          <td>Renders 4 metric summary cards & navigation</td>
+          <td>Total Exam Papers card and active sub-navigation verified</td>
+          <td><span class="badge badge-pass">PASS</span></td>
+        </tr>
+        <tr>
+          <td><strong>SPEC-04</strong></td>
+          <td>Papers Search & Status Filter</td>
+          <td>Filters by search string and <code>?status=DRAFT</code></td>
+          <td>URL searchParams bound; table rows filtered cleanly</td>
+          <td><span class="badge badge-pass">PASS</span></td>
+        </tr>
+        <tr>
+          <td><strong>SPEC-05</strong></td>
+          <td>Sequence Editor Reordering</td>
+          <td>Swaps adjacent question sequence numbers in DRAFT</td>
+          <td>DB confirmed: Occ1 -> #2, Occ2 -> #1 atomically</td>
+          <td><span class="badge badge-pass">PASS</span></td>
+        </tr>
+        <tr>
+          <td><strong>SPEC-06</strong></td>
+          <td>Publication Gate Rejection</td>
+          <td>Rejects incomplete paper with sequence gap</td>
+          <td>Gate 3 failed with Discontinuity warning; Publish button disabled</td>
+          <td><span class="badge badge-pass">PASS</span></td>
+        </tr>
+        <tr>
+          <td><strong>SPEC-07</strong></td>
+          <td>Verified Paper Publication</td>
+          <td>Clears all 6 gates; executes <code>fn_publish_exam_paper</code></td>
+          <td>Confirmation modal confirmed; DB status transitioned to PUBLISHED</td>
+          <td><span class="badge badge-pass">PASS</span></td>
+        </tr>
+        <tr>
+          <td><strong>SPEC-08</strong></td>
+          <td>Student 403 Security Boundary</td>
+          <td>Denies candidate access to administrative routes</td>
+          <td>Administrative Access Denied card displayed; admin nav suppressed</td>
+          <td><span class="badge badge-pass">PASS</span></td>
+        </tr>
+        <tr>
+          <td><strong>SPEC-09</strong></td>
+          <td>Session Persistence & Sign-Out</td>
+          <td>Retains session on reload; invalidates on logout</td>
+          <td>Reload maintained session; sign-out cleared cookies and failed closed</td>
+          <td><span class="badge badge-pass">PASS</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>4. Visual Evidence Registry (15 Screenshots)</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Filename</th>
+          <th>Workflow Step</th>
+          <th>Visual Evidence Details</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><code>01-admin-signin-form.png</code></td><td>Admin Sign-In</td><td>Login form with return destination <code>next=/admin</code></td></tr>
+        <tr><td><code>02-admin-signin-success-dashboard.png</code></td><td>Admin Dashboard</td><td>Landing on <code>/admin</code> overview page post-authentication</td></tr>
+        <tr><td><code>03-admin-identity-verified.png</code></td><td>Identity Header</td><td>Header with admin email and green Verified Administrator badge</td></tr>
+        <tr><td><code>04-admin-overview-metrics.png</code></td><td>Overview Metrics</td><td>Summary cards: Total, Published, Verified, and In-Progress</td></tr>
+        <tr><td><code>05-papers-management-table.png</code></td><td>Papers Table</td><td>Exam papers table displaying code, title, status, and actions</td></tr>
+        <tr><td><code>06-papers-table-search-filtered.png</code></td><td>Table Search</td><td>Filter applied for query "Sequence Test"</td></tr>
+        <tr><td><code>07-papers-table-status-filtered.png</code></td><td>Table Status Filter</td><td>Filter applied for status <code>status=DRAFT</code></td></tr>
+        <tr><td><code>08-sequence-editor-initial.png</code></td><td>Sequence Editor</td><td>Question occurrences in initial sequence (#1, #2) with move controls</td></tr>
+        <tr><td><code>09-sequence-editor-swapped-success.png</code></td><td>Sequence Swapped</td><td>Green success alert confirming atomic reordering</td></tr>
+        <tr><td><code>10-publication-gate-rejection-gap.png</code></td><td>Gate Rejection</td><td>Gate 3 failing with sequence discontinuity; Publish button disabled</td></tr>
+        <tr><td><code>11-publication-all-gates-clear.png</code></td><td>Verified Gates</td><td>All 6 gates green ("All Gates Clear") for verified paper</td></tr>
+        <tr><td><code>12-publication-confirm-modal.png</code></td><td>Publication Modal</td><td>Confirmation dialog with irreversible immutability warning</td></tr>
+        <tr><td><code>13-publication-executed-success.png</code></td><td>Publication Success</td><td>Success card with Paper ID, status PUBLISHED, and publisher identity</td></tr>
+        <tr><td><code>14-student-forbidden-access-denied.png</code></td><td>Student Boundary</td><td>HTTP 403 Administrative Access Denied card with Return link</td></tr>
+        <tr><td><code>15-signout-boundary-cleared.png</code></td><td>Post Sign-Out</td><td>Clean redirect to sign-in page after cookie invalidation</td></tr>
+      </tbody>
+    </table>
+
+    <h2>5. Verdict & Next Implementation Step</h2>
+    <div style="background: var(--card-bg); border: 1px solid var(--border); border-radius: 0.75rem; padding: 1.5rem; margin-top: 1.5rem;">
+      <h3 style="margin-top: 0; color: var(--emerald);">Final Milestone Verdict: PASS</h3>
+      <p style="margin-bottom: 0;">
+        Admin verification, deep-linking, question sequence reordering, publication quality gates, atomic publication procedures, and student authorization boundaries are 100% verified.
+      </p>
+      <h3 style="color: var(--indigo); margin-top: 1.25rem;">Exact Next Step: Phase 8 — Candidate Examination Engine & Real-Time Attempt Lifecycle</h3>
+      <ol style="margin-bottom: 0; padding-left: 1.25rem;">
+        <li><strong>Candidate Exam Taking Experience:</strong> Launch <code>/exams/[paperId]/take</code> with server-authoritative timers and heartbeat persistence.</li>
+        <li><strong>Booklet Series Randomization:</strong> Seed-based or deterministic Series A/B/C/D mapping.</li>
+        <li><strong>Attempt Response Auto-Save:</strong> Resilient debounced submission ledger.</li>
+        <li><strong>Instant Preliminary Scoring:</strong> Two-tier evaluation ledger trigger upon exam final submission.</li>
+      </ol>
+    </div>
+  </div>
+</body>
+</html>

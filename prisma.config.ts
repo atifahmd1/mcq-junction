@@ -1,9 +1,20 @@
 import { config } from "dotenv";
 import { defineConfig, env } from "prisma/config";
 
+// Preserve explicit process environment if already set (e.g. CLI flags or isolated test runners)
+const explicitDirectUrl = process.env.DIRECT_URL;
+const explicitDatabaseUrl = process.env.DATABASE_URL;
+
 // Match Next.js env loading: .env first, then .env.local overrides.
 config({ path: ".env" });
 config({ path: ".env.local", override: true });
+
+if (explicitDirectUrl) {
+  process.env.DIRECT_URL = explicitDirectUrl;
+}
+if (explicitDatabaseUrl) {
+  process.env.DATABASE_URL = explicitDatabaseUrl;
+}
 
 export default defineConfig({
   schema: "prisma/schema.prisma",

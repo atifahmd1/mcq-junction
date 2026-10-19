@@ -1,7 +1,7 @@
 import "server-only";
 
 import type { User as SupabaseUser } from "@supabase/supabase-js";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "../prisma.ts";
 
 export type SyncUserResult = {
   success: boolean;

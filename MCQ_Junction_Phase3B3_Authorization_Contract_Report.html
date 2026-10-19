@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MCQ Junction — Phase 3B.3 Authorization Contract & Credential Hygiene Report</title>
+  <style>
+    :root {
+      --bg: #090d16;
+      --card-bg: #111827;
+      --card-border: #1f2937;
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --primary: #3b82f6;
+      --primary-hover: #2563eb;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --accent: #8b5cf6;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      line-height: 1.6;
+      padding: 2.5rem 1.5rem;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    header {
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 2rem;
+      margin-bottom: 2.5rem;
+    }
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .badge-decision {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .badge-sub {
+      background: rgba(59, 130, 246, 0.15);
+      color: #60a5fa;
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      margin-left: 0.5rem;
+    }
+    h1 {
+      font-size: 2.25rem;
+      font-weight: 800;
+      margin-top: 1rem;
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.025em;
+      color: #ffffff;
+    }
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      margin-top: 1.5rem;
+      padding: 1rem;
+      background: var(--card-bg);
+      border-radius: 0.75rem;
+      border: 1px solid var(--card-border);
+    }
+    .meta-item { font-size: 0.9rem; }
+    .meta-label { color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; font-weight: 600; }
+    .meta-val { color: var(--text-main); font-weight: 500; margin-top: 0.25rem; }
+
+    section { margin-bottom: 3rem; }
+    h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--card-border);
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    h3 {
+      font-size: 1.15rem;
+      font-weight: 600;
+      margin: 1.5rem 0 0.75rem 0;
+      color: #e5e7eb;
+    }
+    p { margin-bottom: 1rem; color: #d1d5db; }
+    
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .callout {
+      border-left: 4px solid var(--primary);
+      background: rgba(59, 130, 246, 0.08);
+      padding: 1rem 1.25rem;
+      border-radius: 0 0.5rem 0.5rem 0;
+      margin: 1.25rem 0;
+    }
+    .callout-success {
+      border-left-color: var(--success);
+      background: rgba(16, 185, 129, 0.08);
+    }
+    .callout-warning {
+      border-left-color: var(--warning);
+      background: rgba(245, 158, 11, 0.08);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0 1.5rem 0;
+      font-size: 0.9rem;
+    }
+    th, td {
+      padding: 0.75rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--card-border);
+    }
+    th {
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+    }
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+    .status-pill {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 0.375rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-align: center;
+    }
+    .status-pass {
+      background: rgba(16, 185, 129, 0.2);
+      color: #10b981;
+      border: 1px solid rgba(16, 185, 129, 0.4);
+    }
+
+    pre {
+      background: #06090e;
+      border: 1px solid var(--card-border);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      margin: 1rem 0;
+      color: #93c5fd;
+    }
+    code {
+      font-family: var(--font-mono);
+      background: rgba(255, 255, 255, 0.08);
+      padding: 0.15rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.85em;
+      color: #e2e8f0;
+    }
+
+    .diagram-container {
+      background: #06090e;
+      border: 1px solid var(--card-border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    svg {
+      max-width: 100%;
+      height: auto;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div>
+      <span class="badge badge-decision">PASS WITH DOCUMENTED LIMITATIONS</span>
+      <span class="badge badge-sub">PHASE 3B.3 COMPLETE</span>
+    </div>
+    <h1>MCQ Junction — Phase 3B.3 Authorization Contract & Credential Hygiene Report</h1>
+    <p>Formal Specification Closure, PostgreSQL Role Security Mechanics, Credential Sanitation & Phase 4 Application Contract</p>
+    
+    <div class="meta-grid">
+      <div class="meta-item">
+        <div class="meta-label">Document ID</div>
+        <div class="meta-val"><code>MCQJ-AUDIT-v3.3.0-PHASE3B3</code></div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Audit Date</div>
+        <div class="meta-val">October 12, 2026</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Integration Tests</div>
+        <div class="meta-val" style="color:#10b981; font-weight:700;">18/18 PASS (3,818ms)</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Unit Test Suite</div>
+        <div class="meta-val" style="color:#10b981; font-weight:700;">9/9 PASS (1,454ms)</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Section 1: Executive Summary -->
+  <section>
+    <h2>1. Executive Summary & Verdict</h2>
+    <div class="card">
+      <p>
+        Phase 3B.3 delivers technical closure for the MCQ Junction database architecture. All outstanding security recommendations from Phase 3B.2 have been remediated: <strong>SEC-FINDING-03 (Credential Hygiene)</strong> was resolved by completely purging static credentials from codebase files and enforcing fail-closed environment variable validation; the <strong>Phase 4 Authorization Contract</strong> was formalized across three distinct invocation paths; and <strong>DB-18</strong> was added to the test suite, bringing total verified PostgreSQL integration tests to <strong>18/18 PASS</strong>.
+      </p>
+      <div class="callout callout-success">
+        <strong>Formal Verdict: PASS WITH DOCUMENTED LIMITATIONS</strong><br>
+        All domain invariants, publication gates, and authorization contracts are certified inside PostgreSQL 16. The limitation is strictly documented: the integration suite executes against a local disposable container with Supabase compatibility mocks rather than mutating the live remote Supabase project.
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 2: Credential Hygiene Remediation -->
+  <section>
+    <h2>2. Resolution of SEC-FINDING-03 (Credential Hygiene)</h2>
+    <div class="card">
+      <p>
+        In previous audit artifacts, a static test database password was hardcoded as a default fallback in <code>docker-compose.test.yml</code> and referenced in documentation examples. Although this credential was restricted to local disposable test containers, hardcoding credentials violates credential-hygiene policies.
+      </p>
+      <h3>Remediation Matrix</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Remediation Action</th>
+            <th>Implementation Detail</th>
+            <th>Verification Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Fail-Closed Docker Compose</strong></td>
+            <td>Changed to <code>${TEST_DB_PASSWORD:?Environment variable TEST_DB_PASSWORD is required for disposable test container}</code></td>
+            <td><span class="status-pill status-pass">VERIFIED</span></td>
+          </tr>
+          <tr>
+            <td><strong>100% Codebase Scrubbing</strong></td>
+            <td>Scrubbed literal password from all reports, test outputs, JSON findings, and configuration</td>
+            <td><span class="status-pill status-pass">VERIFIED (0 OCCURRENCES)</span></td>
+          </tr>
+          <tr>
+            <td><strong>Dynamic Credential Generation</strong></td>
+            <td>Harness dynamically generates high-entropy UUID passwords per session (never logged in plaintext)</td>
+            <td><span class="status-pill status-pass">VERIFIED</span></td>
+          </tr>
+          <tr>
+            <td><strong>Environment Isolation</strong></td>
+            <td>Verified <code>.env.local</code> untouched; remote Supabase credentials isolated</td>
+            <td><span class="status-pill status-pass">VERIFIED</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Section 3: Architecture Diagram & Multi-Path Contract -->
+  <section>
+    <h2>3. Formal Phase 4 Authorization Contract</h2>
+    <p>
+      The architecture supports three distinct execution paths. Security Definer procedures inside PostgreSQL enforce rigorous Gate 0 identity checks to prevent caller spoofing:
+    </p>
+
+    <div class="diagram-container">
+      <svg viewBox="0 0 950 480" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+        <!-- Background -->
+        <rect width="950" height="480" fill="#0b1120" rx="12"/>
+        
+        <!-- Headers -->
+        <rect x="20" y="20" width="280" height="40" fill="#1e293b" rx="6"/>
+        <text x="160" y="45" fill="#94a3b8" font-family="sans-serif" font-size="14" font-weight="bold" text-anchor="middle">CLIENT INVOCATION LAYER</text>
+
+        <rect x="330" y="20" width="280" height="40" fill="#1e293b" rx="6"/>
+        <text x="470" y="45" fill="#94a3b8" font-family="sans-serif" font-size="14" font-weight="bold" text-anchor="middle">GATEWAY & RUNTIME LAYER</text>
+
+        <rect x="640" y="20" width="290" height="40" fill="#1e293b" rx="6"/>
+        <text x="785" y="45" fill="#94a3b8" font-family="sans-serif" font-size="14" font-weight="bold" text-anchor="middle">POSTGRESQL 16 KERNEL</text>
+
+        <!-- Path A: PostgREST JWT -->
+        <rect x="30" y="80" width="260" height="90" fill="#1e3a8a" stroke="#3b82f6" stroke-width="1.5" rx="8"/>
+        <text x="45" y="105" fill="#93c5fd" font-family="sans-serif" font-size="13" font-weight="bold">PATH A: PostgREST RPC (JWT)</text>
+        <text x="45" y="125" fill="#cbd5e1" font-family="sans-serif" font-size="11">Client Browser / Mobile App</text>
+        <text x="45" y="145" fill="#94a3b8" font-family="sans-serif" font-size="10">Passes Bearer JWT with sub = user_id</text>
+
+        <path d="M 290 125 L 340 125" stroke="#3b82f6" stroke-width="2" marker-end="url(#arrow)"/>
+
+        <rect x="340" y="80" width="260" height="90" fill="#0f172a" stroke="#334155" stroke-width="1.5" rx="8"/>
+        <text x="355" y="105" fill="#e2e8f0" font-family="sans-serif" font-size="13" font-weight="bold">Supabase PostgREST</text>
+        <text x="355" y="125" fill="#94a3b8" font-family="sans-serif" font-size="11">SET LOCAL ROLE authenticated;</text>
+        <text x="355" y="145" fill="#94a3b8" font-family="sans-serif" font-size="11">SET LOCAL request.jwt.claim.sub;</text>
+
+        <path d="M 600 125 L 650 125" stroke="#3b82f6" stroke-width="2"/>
+
+        <rect x="650" y="80" width="270" height="90" fill="#064e3b" stroke="#10b981" stroke-width="1.5" rx="8"/>
+        <text x="665" y="105" fill="#6ee7b7" font-family="sans-serif" font-size="13" font-weight="bold">Guard 0.2: auth.uid() Check</text>
+        <text x="665" y="125" fill="#a7f3d0" font-family="sans-serif" font-size="11">Enforces p_admin_id = auth.uid()</text>
+        <text x="665" y="145" fill="#34d399" font-family="sans-serif" font-size="10">Verified role = 'ADMIN' in users</text>
+
+        <!-- Path B: Server Action Prisma -->
+        <rect x="30" y="200" width="260" height="110" fill="#1e1b4b" stroke="#8b5cf6" stroke-width="1.5" rx="8"/>
+        <text x="45" y="225" fill="#c4b5fd" font-family="sans-serif" font-size="13" font-weight="bold">PATH B: Next.js Server Action</text>
+        <text x="45" y="245" fill="#cbd5e1" font-family="sans-serif" font-size="11">Browser invokes Server Action</text>
+        <text x="45" y="265" fill="#94a3b8" font-family="sans-serif" font-size="10">Session cookies verified on server</text>
+        <text x="45" y="285" fill="#94a3b8" font-family="sans-serif" font-size="10">Calls assertAdminSession()</text>
+
+        <path d="M 290 255 L 340 255" stroke="#8b5cf6" stroke-width="2"/>
+
+        <rect x="340" y="200" width="260" height="110" fill="#0f172a" stroke="#334155" stroke-width="1.5" rx="8"/>
+        <text x="355" y="225" fill="#e2e8f0" font-family="sans-serif" font-size="13" font-weight="bold">Next.js App Router (Node.js)</text>
+        <text x="355" y="245" fill="#cbd5e1" font-family="sans-serif" font-size="11">supabase.auth.getUser() validated</text>
+        <text x="355" y="265" fill="#94a3b8" font-family="sans-serif" font-size="11">Prisma DATABASE_URL direct pool</text>
+        <text x="355" y="285" fill="#94a3b8" font-family="sans-serif" font-size="10">SESSION_USER = 'postgres'</text>
+
+        <path d="M 600 255 L 650 255" stroke="#8b5cf6" stroke-width="2"/>
+
+        <rect x="650" y="200" width="270" height="110" fill="#064e3b" stroke="#10b981" stroke-width="1.5" rx="8"/>
+        <text x="665" y="225" fill="#6ee7b7" font-family="sans-serif" font-size="13" font-weight="bold">Guard 0.4: Trusted Backend</text>
+        <text x="665" y="245" fill="#a7f3d0" font-family="sans-serif" font-size="11">SESSION_USER IN ('postgres')</text>
+        <text x="665" y="265" fill="#a7f3d0" font-family="sans-serif" font-size="11">AND auth.role() IS NULL</text>
+        <text x="665" y="285" fill="#34d399" font-family="sans-serif" font-size="10">p_admin_id verified in users table</text>
+
+        <!-- Path C: Headless Service Role (Fail Closed) -->
+        <rect x="30" y="340" width="260" height="90" fill="#450a0a" stroke="#ef4444" stroke-width="1.5" rx="8"/>
+        <text x="45" y="365" fill="#fca5a5" font-family="sans-serif" font-size="13" font-weight="bold">PATH C: Headless Service Role</text>
+        <text x="45" y="385" fill="#cbd5e1" font-family="sans-serif" font-size="11">Cron / Background Worker</text>
+        <text x="45" y="405" fill="#94a3b8" font-family="sans-serif" font-size="10">Calls PostgREST via service_role key</text>
+
+        <path d="M 290 385 L 340 385" stroke="#ef4444" stroke-width="2"/>
+
+        <rect x="340" y="340" width="260" height="90" fill="#0f172a" stroke="#334155" stroke-width="1.5" rx="8"/>
+        <text x="355" y="365" fill="#e2e8f0" font-family="sans-serif" font-size="13" font-weight="bold">Supabase PostgREST</text>
+        <text x="355" y="385" fill="#94a3b8" font-family="sans-serif" font-size="11">SET LOCAL ROLE service_role;</text>
+        <text x="355" y="405" fill="#94a3b8" font-family="sans-serif" font-size="11">auth.uid() IS NULL</text>
+
+        <path d="M 600 385 L 650 385" stroke="#ef4444" stroke-width="2"/>
+
+        <rect x="650" y="340" width="270" height="90" fill="#7f1d1d" stroke="#ef4444" stroke-width="1.5" rx="8"/>
+        <text x="665" y="365" fill="#fca5a5" font-family="sans-serif" font-size="13" font-weight="bold">Guard 0.5: FAIL CLOSED</text>
+        <text x="665" y="385" fill="#fecaca" font-family="sans-serif" font-size="11">MCQJ-ERR-5015: Missing session</text>
+        <text x="665" y="405" fill="#ef4444" font-family="sans-serif" font-size="10">Headless mutation rejected (audited admin req)</text>
+      </svg>
+    </div>
+
+    <div class="card">
+      <h3>Key Security Mechanics</h3>
+      <ul>
+        <li><strong>SESSION_USER vs CURRENT_USER:</strong> In PostgreSQL <code>SECURITY DEFINER</code> functions, <code>CURRENT_USER</code> always resolves to the function owner (<code>postgres</code>). Evaluating <code>CURRENT_USER</code> creates an authorization bypass vulnerability. Guards inspect <code>SESSION_USER</code> and <code>auth.role()</code> instead.</li>
+        <li><strong>Anti-Spoofing Assertion:</strong> When called via PostgREST, Guard 0.2 verifies that <code>p_admin_user_id = auth.uid()</code>, preventing any user from publishing on behalf of another user ID.</li>
+        <li><strong>Mandatory Audited Admin Identity:</strong> Headless service-role requests via PostgREST (Path C) are intentionally rejected by Guard 0.5 because publications and re-evaluations must be attributed to an authentic administrator in the audit ledger.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Section 4: Empirical Verification Matrix -->
+  <section>
+    <h2>4. Empirical Verification Matrix (18/18 DB + 9/9 Unit PASS)</h2>
+    <div class="card">
+      <h3>PostgreSQL 16 Integration Suite</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Test ID</th>
+            <th>Verification Domain</th>
+            <th>Enforcement Mechanism</th>
+            <th>Result</th>
+            <th>Duration</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>DB-01</strong></td>
+            <td>Immutability</td>
+            <td>Trigger blocks UPDATE on published question</td>
+            <td><span class="status-pill status-pass">PASS</span></td>
+            <td>138.5ms</td>
+          </tr>
+          <tr>
+            <td><strong>DB-02</strong></td>
+            <td>Immutability</td>
+            <td>Trigger blocks reparenting question out of published paper</td>
+            <td><span class="status-pill status-pass">PASS</span></td>
+            <td>179.9ms</td>
+          </tr>
+          <tr>
+            <td><strong>DB-03</strong></td>
+            <td>Immutability</td>
+            <td>Trigger blocks deleting passage referenced by published paper</td>
+            <td><span class="status-pill status-pass">PASS</span></td>
+            <td>115.8ms</td>
+          </tr>
+          <tr>
+            <td><strong>DB-04</strong></td>
+            <td>Relational Integrity</td>
+            <td>Composite FK blocks cross-paper booklet assignment</td>
+            <td><span class="status-pill status-pass">PASS</span></td>
+            <td>164.4ms</td>
+          </tr>
+          <tr>
+            <td><strong>DB-05</strong></td>
+            <td>Relational Integrity</td>
+            <td>Composite FK blocks cross-paper question mapping</td>
+            <td><span class="status-pill status-pass">PASS</span></td>
+            <td>160.4ms</td>
+          </tr>
+          <tr>
+            <td><strong>DB-06</strong></td>
+            <td>Relational Integrity</td>
+            <td>Triggers block cross-question option mappings and parent updates</td>
+            <td><span class="status-pill status-pass">PASS</span></td>
+            <td>481.2ms</td>
+          </tr>
+          <tr>
+            <td><strong>DB-07</strong></td>
+            <td>Relational Integrity</td>
+            <td>Composite FK blocks cross-paper attempt response mapping</td>
+            <td><span class="status-pill status-pass">PASS</span></td>
+            <td>474.9ms</td>
+          </tr>
+          <tr>
+            <td><strong>DB-08</strong></td>
+            <td>Publication Gate</td>
+            <td>Gate 5 sequence contiguity check rejects gaps</td>
+            <td><span class="status-pill status-pass">PASS</span></td>
+            <td>326.2ms</td>
+          </tr>
+          <tr>
+            <td><strong>DB-09</strong></td>
+            <td>Publication Gate</td>
+            <td>Gate 6 editorial verification check rejects unverified representations</td>
+            <td><span class="status-pill status-pass">PASS</span></td>
+            <td>269.5ms</td>
+          </tr>
+          <tr>
+            <td><strong>DB-10</strong></td>
+            <td>Publication Gate</td>
+            <td>Gate 10 answer key coverage check rejects incomplete keys</td>
+            <td><span class="status-pill status-pass">PASS</span></td>
+            <td>211.8ms</td>
+          </tr>
+          <tr>
+            <td><strong>DB-11</strong></td>
+            <td>Security Gate</td>
+            <td>10-point caller authorization suite rejects invalid/spoofed callers</td>
+            <td><span class="status-pill status-pass">PASS</span></td>
+            <td>168.9ms</td>
+          </tr>
+          <tr>
+            <td><strong>DB-12</strong></td>
+            <td>Publication Gate</td>
+            <td>Master publication procedure transitions paper to PUBLISHED</td>
+            <td><span class="status-pill status-pass">PASS</span></td>
+            <td>84.2ms</td>
+          </tr>
+          <tr>
+            <td><strong>DB-13</strong></td>
+            <td>Publication Gate</td>
+            <td>Failed publication leaves paper in VERIFIED state (atomicity)</td>
+            <td><span class="status-pill status-pass">PASS</span></td>
+            <td>74.2ms</td>
+          </tr>
+          <tr>
+            <td><strong>DB-14</strong></td>
+            <td>Two-Tier Ledger</td>
+            <td>Original evaluation v1 remains immutable after re-evaluation</td>
+            <td><span class="status-pill status-pass">PASS</span></td>
+            <td>89.3ms</td>
+          </tr>
+          <tr>
+            <td><strong>DB-15</strong></td>
+            <td>Two-Tier Ledger</td>
+            <td>Partial unique index guarantees single active evaluation</td>
+            <td><span class="status-pill status-pass">PASS</span></td>
+            <td>75.8ms</td>
+          </tr>
+          <tr>
+            <td><strong>DB-16</strong></td>
+            <td>Concurrency</td>
+            <td>Session advisory lock serializes concurrent publication requests</td>
+            <td><span class="status-pill status-pass">PASS</span></td>
+            <td>96.8ms</td>
+          </tr>
+          <tr>
+            <td><strong>DB-17</strong></td>
+            <td>Scoring & Policies</td>
+            <td>Check constraints enforce nonnegative penalty and positive marks</td>
+            <td><span class="status-pill status-pass">PASS</span></td>
+            <td>138.7ms</td>
+          </tr>
+          <tr>
+            <td><strong>DB-18</strong></td>
+            <td>Phase 4 Auth Contract</td>
+            <td>8-point verification: Path B Server Action direct connection, users table role check, anti-spoofing mismatch rejection, Path C headless rejection, and re-evaluation ledger</td>
+            <td><span class="status-pill status-pass">PASS</span></td>
+            <td>205.3ms</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>CI Pipeline Validation Matrix</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Validation Step</th>
+            <th>Tool / Command</th>
+            <th>Observed Result</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Prisma Schema Validation</td>
+            <td><code>npx prisma validate</code></td>
+            <td><span class="status-pill status-pass">VALID</span></td>
+          </tr>
+          <tr>
+            <td>Prisma Client Generation</td>
+            <td><code>npm run db:generate</code></td>
+            <td><span class="status-pill status-pass">GENERATED (858ms)</span></td>
+          </tr>
+          <tr>
+            <td>TypeScript Strict Typecheck</td>
+            <td><code>npm run typecheck</code></td>
+            <td><span class="status-pill status-pass">0 ERRORS</span></td>
+          </tr>
+          <tr>
+            <td>ESLint Code Quality</td>
+            <td><code>npm run lint</code></td>
+            <td><span class="status-pill status-pass">0 ERRORS / 0 WARNINGS</span></td>
+          </tr>
+          <tr>
+            <td>Next.js Production Build</td>
+            <td><code>npm run build</code></td>
+            <td><span class="status-pill status-pass">SUCCESS (Turbopack)</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Section 5: Phase 4 Transition Sign-Off -->
+  <section>
+    <h2>5. Phase 4 Transition Sign-Off</h2>
+    <div class="card">
+      <p>
+        With the completion of Phase 3B.3, the foundational security and database architecture is fully hardened. The domain models, composite keys, immutability triggers, publication gates, and authorization contracts are empirically verified.
+      </p>
+      <div class="callout callout-success">
+        <strong>Sign-Off Decision: APPROVED FOR PHASE 4 IMPLEMENTATION</strong><br>
+        Application service layer, administrative workflows, and exam attempt UI development may begin under the established Phase 4 Authorization Contract.
+      </div>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>

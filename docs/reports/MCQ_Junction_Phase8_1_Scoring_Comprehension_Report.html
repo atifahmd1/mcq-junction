@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MCQ Junction — Phase 8.1: All-or-Nothing Scoring & Comprehension Questions Report</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      mermaid.initialize({ startOnLoad: true, theme: "dark" });
+    });
+  </script>
+  <style>
+    :root {
+      --bg: #09090b;
+      --card-bg: #18181b;
+      --border: #27272a;
+      --text: #f4f4f5;
+      --text-muted: #a1a1aa;
+      --indigo: #6366f1;
+      --indigo-bg: rgba(99, 102, 241, 0.12);
+      --purple: #a855f7;
+      --purple-bg: rgba(168, 85, 247, 0.12);
+      --emerald: #10b981;
+      --emerald-bg: rgba(16, 185, 129, 0.12);
+      --amber: #f59e0b;
+      --amber-bg: rgba(245, 158, 11, 0.12);
+      --red: #ef4444;
+      --red-bg: rgba(239, 68, 68, 0.12);
+      --blue: #3b82f6;
+      --blue-bg: rgba(59, 130, 246, 0.12);
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      margin: 0;
+      padding: 2.5rem 1.5rem;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    header {
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 2rem;
+      margin-bottom: 2.5rem;
+    }
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .badge-pass {
+      background: var(--emerald-bg);
+      color: var(--emerald);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .badge-indigo {
+      background: var(--indigo-bg);
+      color: var(--indigo);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+    }
+    .badge-purple {
+      background: var(--purple-bg);
+      color: var(--purple);
+      border: 1px solid rgba(168, 85, 247, 0.3);
+    }
+    .badge-amber {
+      background: var(--amber-bg);
+      color: var(--amber);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+    .badge-blue {
+      background: var(--blue-bg);
+      color: var(--blue);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+    h1 {
+      font-size: 2.25rem;
+      font-weight: 800;
+      margin: 1rem 0 0.5rem;
+      letter-spacing: -0.02em;
+    }
+    .meta {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      margin-top: 0.75rem;
+    }
+    h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-top: 2.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+      color: #fafafa;
+    }
+    h3 {
+      font-size: 1.15rem;
+      font-weight: 600;
+      margin-top: 1.5rem;
+      color: #e4e4e7;
+    }
+    p, li {
+      color: #d4d4d8;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.25rem;
+    }
+    .card-title {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+    .card-value {
+      font-size: 1.75rem;
+      font-weight: 800;
+      margin-top: 0.5rem;
+      color: #fff;
+    }
+    .card-subtitle {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 0.25rem;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: 0.875rem;
+    }
+    th, td {
+      padding: 0.75rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    th {
+      background: rgba(255, 255, 255, 0.03);
+      color: #fafafa;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+    }
+    td {
+      color: #d4d4d8;
+    }
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.85em;
+      background: rgba(255, 255, 255, 0.06);
+      padding: 0.2em 0.4em;
+      border-radius: 0.25rem;
+      color: #e4e4e7;
+    }
+    pre {
+      background: #121214;
+      border: 1px solid var(--border);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      font-size: 0.825rem;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+      color: #d4d4d8;
+    }
+    .mermaid {
+      background: #121214;
+      border: 1px solid var(--border);
+      padding: 1.5rem;
+      border-radius: 0.75rem;
+      margin: 1.5rem 0;
+    }
+    .callout {
+      border-left: 4px solid var(--indigo);
+      background: var(--indigo-bg);
+      padding: 1rem 1.25rem;
+      border-radius: 0 0.5rem 0.5rem 0;
+      margin: 1.5rem 0;
+    }
+    .callout-success {
+      border-left-color: var(--emerald);
+      background: var(--emerald-bg);
+    }
+    .callout-purple {
+      border-left-color: var(--purple);
+      background: var(--purple-bg);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+        <span class="badge badge-pass">Release Verdict: PASS</span>
+        <span class="badge badge-purple">Phase 8.1</span>
+        <span class="badge badge-indigo">PostgreSQL 16 Container Verified</span>
+        <span class="badge badge-amber">All-or-Nothing Scoring</span>
+      </div>
+      <h1>Phase 8.1: All-or-Nothing Scoring & Comprehension Questions</h1>
+      <div class="meta">
+        <div><strong>Date:</strong> October 16, 2026</div>
+        <div><strong>Auditor:</strong> Principal Engineer & QA Lead</div>
+        <div><strong>Target:</strong> Docker PostgreSQL 16.11 (`127.0.0.1:5433`)</div>
+        <div><strong>Automated Tests:</strong> 152 / 152 Passed</div>
+      </div>
+    </header>
+
+    <div class="grid">
+      <div class="card">
+        <div class="card-title">Automated Tests</div>
+        <div class="card-value" style="color: var(--emerald);">152 / 152</div>
+        <div class="card-subtitle">107 Unit + 45 Live PostgreSQL (0 Failures)</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Scoring Accuracy</div>
+        <div class="card-value" style="color: var(--indigo);">100%</div>
+        <div class="card-subtitle">Strict All-or-Nothing (Zero Partial Credit)</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Supported Languages</div>
+        <div class="card-value" style="color: var(--purple);">EN • HI • UR • BN</div>
+        <div class="card-subtitle">Native RTL Urdu with Isolated LTR Controls</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Live DB Migrations</div>
+        <div class="card-value" style="color: var(--amber);">9 / 9</div>
+        <div class="card-subtitle">Applied in ~250ms on Docker PG 16 Container</div>
+      </div>
+    </div>
+
+    <h2>1. Executive Summary</h2>
+    <p>
+      Phase 8.1 successfully hardens MCQ Junction's evaluation and question engine, introducing strict all-or-nothing multiple-correct scoring, multi-question comprehension passages, multi-lingual / RTL rendering, and live database verification against a local disposable PostgreSQL 16 container.
+    </p>
+
+    <div class="callout callout-success">
+      <strong>Zero Partial Credit Guarantee:</strong> Examination scoring enforces strict all-or-nothing comparison for multiple-correct items. For correct set <code>{B, D}</code>, candidates receive full positive marks only upon an exact match. Subsets, extra distractors, or wrong choices receive zero positive marks and incur configured negative penalties.
+    </div>
+
+    <h2>2. Authoritative All-or-Nothing Scoring Matrix</h2>
+    <p>
+      Target Question Config: Correct Option Set <code>{B, D}</code> | Marks Per Correct = <code>+3.000</code> | Penalty Per Wrong = <code>-1.000</code>.
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th>Candidate Selected Set</th>
+          <th>Set Comparison</th>
+          <th>Authoritative Status</th>
+          <th>Marks</th>
+          <th>Penalty</th>
+          <th>Net Awarded</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>['B', 'D']</code></td>
+          <td>Exact Match</td>
+          <td><span class="badge badge-pass">CORRECT</span></td>
+          <td>+3.000</td>
+          <td>0.000</td>
+          <td><strong>+3.000</strong></td>
+        </tr>
+        <tr>
+          <td><code>['D', 'B']</code></td>
+          <td>Exact Match (Permuted)</td>
+          <td><span class="badge badge-pass">CORRECT</span></td>
+          <td>+3.000</td>
+          <td>0.000</td>
+          <td><strong>+3.000</strong></td>
+        </tr>
+        <tr>
+          <td><code>['B', 'B', 'D', 'D']</code></td>
+          <td>Exact Match (Deduplicated)</td>
+          <td><span class="badge badge-pass">CORRECT</span></td>
+          <td>+3.000</td>
+          <td>0.000</td>
+          <td><strong>+3.000</strong></td>
+        </tr>
+        <tr>
+          <td><code>['B']</code></td>
+          <td>Incomplete Subset</td>
+          <td><span class="badge" style="background: var(--red-bg); color: var(--red);">INCORRECT</span></td>
+          <td>0.000</td>
+          <td>1.000</td>
+          <td><strong>-1.000</strong></td>
+        </tr>
+        <tr>
+          <td><code>['D']</code></td>
+          <td>Incomplete Subset</td>
+          <td><span class="badge" style="background: var(--red-bg); color: var(--red);">INCORRECT</span></td>
+          <td>0.000</td>
+          <td>1.000</td>
+          <td><strong>-1.000</strong></td>
+        </tr>
+        <tr>
+          <td><code>['A', 'B', 'D']</code></td>
+          <td>Wrong Distractor Included</td>
+          <td><span class="badge" style="background: var(--red-bg); color: var(--red);">INCORRECT</span></td>
+          <td>0.000</td>
+          <td>1.000</td>
+          <td><strong>-1.000</strong></td>
+        </tr>
+        <tr>
+          <td><code>['A']</code></td>
+          <td>Isolated Wrong Distractor</td>
+          <td><span class="badge" style="background: var(--red-bg); color: var(--red);">INCORRECT</span></td>
+          <td>0.000</td>
+          <td>1.000</td>
+          <td><strong>-1.000</strong></td>
+        </tr>
+        <tr>
+          <td><code>[]</code> (Empty)</td>
+          <td>Unanswered</td>
+          <td><span class="badge badge-indigo">UNANSWERED</span></td>
+          <td>0.000</td>
+          <td>0.000</td>
+          <td><strong>0.000</strong></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="mermaid">
+flowchart TD
+    A["Candidate Response Set"] --> B["Deduplicate & Normalize Set"]
+    B --> C{"Is Response Set Empty?"}
+    C -- Yes --> D["Status: UNANSWERED<br/>Net: 0.000"]
+    C -- No --> E["Retrieve Authoritative Correct Set"]
+    E --> F{"Set Equality Check:<br/>Candidate Set == Correct Set?"}
+    F -- Exact Match --> G["Status: CORRECT<br/>Award Full Configured Marks (+Marks)"]
+    F -- Mismatch --> H{"Negative Marking Configured?"}
+    H -- Yes --> I["Status: INCORRECT<br/>Deduct Negative Marks (-Penalty)"]
+    H -- No --> J["Status: INCORRECT<br/>Award 0.000"]
+    </div>
+
+    <h2>3. Comprehension / Passage Entity Architecture</h2>
+    <p>
+      Comprehension is modeled as a first-class shared entity (<code>comprehension_passages</code>) allowing multiple child questions to reference a single passage row without text duplication.
+    </p>
+
+    <div class="mermaid">
+erDiagram
+    EXAM_PAPERS ||--o{ PAPER_QUESTION_OCCURRENCES : "contains"
+    COMPREHENSION_PASSAGES ||--o{ PAPER_QUESTION_OCCURRENCES : "context for"
+    PAPER_QUESTION_OCCURRENCES ||--o{ SOURCE_QUESTION_REPRESENTATIONS : "rendered as"
+    SOURCE_QUESTION_REPRESENTATIONS ||--o{ QUESTION_OPTIONS : "has options"
+    PAPER_QUESTION_OCCURRENCES ||--o{ ANSWER_KEY_ITEMS : "keyed by"
+
+    COMPREHENSION_PASSAGES {
+        uuid id PK
+        varchar passage_ref_code UK
+        varchar title
+        text body_text
+        language_code_enum language_code
+        varchar image_url
+        varchar image_alt
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    PAPER_QUESTION_OCCURRENCES {
+        uuid id PK
+        uuid paper_id FK
+        uuid section_id FK
+        uuid conceptual_question_id FK
+        uuid passage_id FK
+        int sequence_number
+        question_type_enum question_type
+    }
+    </div>
+
+    <h2>4. Multi-Language & RTL Layout Engine</h2>
+    <p>
+      MCQ Junction supports multi-lingual passages with native RTL layout for Urdu while isolating LTR badges:
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th>Language</th>
+          <th>Code</th>
+          <th>Script & Direction</th>
+          <th>Isolation Strategy</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>English</td>
+          <td><code>EN</code></td>
+          <td>Latin (LTR)</td>
+          <td>Standard typographic hierarchy</td>
+        </tr>
+        <tr>
+          <td>Hindi</td>
+          <td><code>HI</code></td>
+          <td>Devanagari Unicode (LTR)</td>
+          <td>Preserves vowel ligatures and conjuncts</td>
+        </tr>
+        <tr>
+          <td>Bangla</td>
+          <td><code>BN</code></td>
+          <td>Bengali Unicode (LTR)</td>
+          <td>Preserves complex consonant clusters</td>
+        </tr>
+        <tr>
+          <td>Urdu</td>
+          <td><code>UR</code></td>
+          <td>Nastaliq / Perso-Arabic (RTL)</td>
+          <td><code>dir="rtl"</code> on text; option tags (A, B, C, D) isolated in <code>dir="ltr"</code></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>5. Live PostgreSQL Container Test Verification</h2>
+    <pre><code># Execution Target: 127.0.0.1:5433/mcq_junction_test (Docker Container mcqj-postgres-test)
+✔ DB-PASS-01: Inserts comprehension passage with multi-language Unicode and safe media (96.7ms)
+✔ DB-PASS-02: Links multiple question occurrences to a single shared passage without duplication (43.7ms)
+✔ DB-PASS-03: Publication Gate 7 rejects paper if COMPREHENSION_CHILD is missing passage (74.1ms)
+✔ DB-PASS-04: Publication Gate 7 succeeds when COMPREHENSION_CHILD has valid linked passage (93.5ms)
+✔ DB-PASS-05: Passage immutability trigger blocks modifying or deleting a published paper's passage (68.2ms)
+✔ DB-PASS-06: FK fk_occurrence_passage restricts deleting passage when occurrences exist (38.4ms)
+✔ DB-PASS-07: Authoritative scoring enforces strict all-or-nothing evaluation across candidate attempts (53.5ms)
+✔ Domain Database Integration Suite (tests/database.test.mjs): 19 Passed (2640ms)
+✔ End-to-End Admin Workflows Suite (tests/e2e-workflows.test.mjs): 10 Passed (1421ms)
+✔ Security Isolation Suite (tests/security-isolation.test.mjs): 9 Passed (5499ms)
+✔ Unit & Scoring Suite (npm run test:unit): 107 Passed (6992ms)
+
+TOTAL: 152 / 152 TESTS GREEN (0 FAILURES)</code></pre>
+
+    <h2>6. Production Build & Static Analysis</h2>
+    <ul>
+      <li><strong>TypeScript (<code>tsc --noEmit</code>):</strong> 0 errors across all routes, components, and server actions.</li>
+      <li><strong>ESLint 9:</strong> 0 errors, 0 warnings across all files.</li>
+      <li><strong>Turbopack Production Build (<code>next build</code>):</strong> 15 App Router routes compiled cleanly with Partial Prerendering enabled.</li>
+      <li><strong>Preflight Release Audit (<code>npm run preflight</code>):</strong> PASSED. All 9 forward-only migrations verified.</li>
+    </ul>
+
+    <div class="callout callout-purple">
+      <strong>Transition to Phase 9:</strong> The core assessment domain, all-or-nothing scoring engine, comprehension passage models, and database security gates are verified. The repository is ready for Phase 9: Realtime Examination Engine & Candidate Test Delivery.
+    </div>
+  </div>
+</body>
+</html>

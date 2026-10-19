@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MCQ Junction — Phase 3 Execution & Implementation Report</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      mermaid.initialize({
+        startOnLoad: true,
+        theme: 'neutral',
+        securityLevel: 'loose',
+        flowchart: { useMaxWidth: true, htmlLabels: true }
+      });
+    });
+  </script>
+  <style>
+    :root {
+      --bg-primary: #ffffff;
+      --bg-secondary: #f8fafc;
+      --bg-accent: #f1f5f9;
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --border-color: #cbd5e1;
+      --border-light: #e2e8f0;
+      --primary: #0284c7;
+      --primary-dark: #0369a1;
+      --primary-light: #e0f2fe;
+      --success: #16a34a;
+      --success-bg: #dcfce7;
+      --danger: #dc2626;
+      --danger-bg: #fee2e2;
+      --warning: #d97706;
+      --warning-bg: #fef3c7;
+      --code-bg: #0f172a;
+      --code-text: #f8fafc;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.65;
+      color: var(--text-main);
+      background-color: var(--bg-primary);
+      display: flex;
+    }
+
+    /* Sidebar Navigation */
+    .sidebar {
+      width: 320px;
+      height: 100vh;
+      position: sticky;
+      top: 0;
+      background-color: var(--bg-secondary);
+      border-right: 1px solid var(--border-color);
+      padding: 28px 20px;
+      overflow-y: auto;
+      flex-shrink: 0;
+    }
+
+    .sidebar h2 {
+      font-size: 1.05rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--border-light);
+    }
+
+    .sidebar ul {
+      list-style: none;
+    }
+
+    .sidebar li {
+      margin-bottom: 8px;
+    }
+
+    .sidebar a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.88rem;
+      display: block;
+      padding: 6px 10px;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+      line-height: 1.35;
+    }
+
+    .sidebar a:hover {
+      color: var(--primary-dark);
+      background-color: var(--primary-light);
+    }
+
+    /* Main Container */
+    .content {
+      flex: 1;
+      max-width: 1040px;
+      padding: 48px 56px;
+      margin: 0 auto;
+    }
+
+    .header-box {
+      border-bottom: 2px solid var(--border-color);
+      padding-bottom: 24px;
+      margin-bottom: 36px;
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      color: #032b43;
+      margin-bottom: 12px;
+      line-height: 1.25;
+    }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-light);
+      border-radius: 8px;
+      padding: 16px 20px;
+      font-size: 0.88rem;
+      margin-top: 16px;
+    }
+
+    .meta-item strong {
+      color: var(--text-muted);
+      display: block;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+    }
+
+    .badge-success {
+      background: var(--success-bg);
+      color: var(--success);
+      border: 1px solid #bbf7d0;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+    }
+
+    h2 {
+      font-size: 1.5rem;
+      color: #0f172a;
+      margin: 40px 0 18px 0;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    h3 {
+      font-size: 1.2rem;
+      color: #1e293b;
+      margin: 28px 0 12px 0;
+    }
+
+    p {
+      margin-bottom: 16px;
+      color: #1e293b;
+    }
+
+    ul, ol {
+      margin: 0 0 18px 24px;
+    }
+
+    li {
+      margin-bottom: 6px;
+    }
+
+    /* Tables */
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+      margin: 20px 0 28px 0;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+
+    th {
+      background-color: var(--bg-secondary);
+      color: var(--text-main);
+      font-weight: 600;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border-light);
+      vertical-align: top;
+    }
+
+    tr:nth-child(even) td {
+      background-color: #fafbfc;
+    }
+
+    tr:hover td {
+      background-color: #f1f5f9;
+    }
+
+    /* Code Blocks */
+    pre {
+      background-color: var(--code-bg);
+      color: var(--code-text);
+      padding: 18px 20px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 0.85rem;
+      line-height: 1.5;
+      margin: 16px 0 24px 0;
+      border: 1px solid #334155;
+    }
+
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      background-color: var(--bg-accent);
+      color: #0f172a;
+      padding: 2px 5px;
+      border-radius: 4px;
+      font-size: 0.88em;
+    }
+
+    pre code {
+      background: transparent;
+      color: inherit;
+      padding: 0;
+    }
+
+    /* Callouts */
+    .callout {
+      border-left: 4px solid var(--primary);
+      background-color: var(--primary-light);
+      padding: 16px 20px;
+      border-radius: 0 8px 8px 0;
+      margin: 20px 0;
+    }
+
+    .callout-success {
+      border-left-color: var(--success);
+      background-color: var(--success-bg);
+    }
+
+    .callout-title {
+      font-weight: 700;
+      margin-bottom: 4px;
+      color: var(--text-main);
+    }
+
+    /* Diagrams */
+    .diagram-card {
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 24px;
+      margin: 24px 0;
+      text-align: center;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .diagram-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    /* Print Styles */
+    @media print {
+      body {
+        display: block;
+        background: white;
+        color: black;
+      }
+      .sidebar {
+        display: none;
+      }
+      .content {
+        max-width: 100%;
+        padding: 0;
+      }
+      pre {
+        white-space: pre-wrap;
+        border: 1px solid #999;
+        color: black;
+        background: #f8f8f8;
+      }
+      .diagram-card {
+        page-break-inside: avoid;
+      }
+    }
+
+    @media (max-width: 900px) {
+      body {
+        flex-direction: column;
+      }
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+      }
+      .content {
+        padding: 24px 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar Navigation -->
+  <aside class="sidebar">
+    <h2>Phase 3 Index</h2>
+    <ul>
+      <li><a href="#section-1">1. Executive Summary & Directive</a></li>
+      <li><a href="#section-2">2. Files Changed & Created</a></li>
+      <li><a href="#section-3">3. Durable Decision Record</a></li>
+      <li><a href="#section-4">4. Relational Architecture</a></li>
+      <li><a href="#section-5">5. Immutability & Publication</a></li>
+      <li><a href="#section-6">6. Scoring & Evaluation Ledger</a></li>
+      <li><a href="#section-7">7. CI/CD Verification Results</a></li>
+      <li><a href="#section-8">8. Database Migration Safety</a></li>
+    </ul>
+  </aside>
+
+  <!-- Main Content Area -->
+  <main class="content">
+
+    <div class="header-box">
+      <h1>MCQ Junction — Phase 3 Execution & Implementation Report</h1>
+      <p>Technical Architecture, Prisma 7 Models, PostgreSQL Migration & Scoring Engine</p>
+
+      <div class="meta-grid">
+        <div class="meta-item">
+          <strong>Document ID</strong>
+          MCQJ-PHASE3-EXECUTION-REPORT
+        </div>
+        <div class="meta-item">
+          <strong>Date</strong>
+          October 12, 2026
+        </div>
+        <div class="meta-item">
+          <strong>Classification</strong>
+          Technical Implementation Report
+        </div>
+        <div class="meta-item">
+          <strong>Status</strong>
+          <span class="badge-success">PHASE 3 COMPLETED & VERIFIED</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 1 -->
+    <section id="section-1">
+      <h2>1. Executive Summary & Directive Adoption</h2>
+      <p>
+        Following receipt of the authoritative <strong>Phase 3 Execution Directive</strong>, the audit-and-approval cycle was formally halted. The MCQ Junction codebase was transitioned directly into incremental implementation.
+      </p>
+      <div class="callout callout-success">
+        <div class="callout-title">Phase 3 Implementation: Complete & Verified</div>
+        All approved components from the v3.5 architecture have been successfully created, compiled, and tested against the repository. The test suite is 100% green, static typecheck passed with 0 errors, ESLint passed with 0 warnings, and Next.js production build succeeded with code 0.
+      </div>
+    </section>
+
+    <!-- Section 2 -->
+    <section id="section-2">
+      <h2>2. Actual Files Changed and Created</h2>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>File Path</th>
+              <th>Action</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>.env.local</code></td>
+              <td><strong>Modified</strong></td>
+              <td>Sanitized line 6, removing the stray <code>=require"</code> string. Both connection strings are clean.</td>
+            </tr>
+            <tr>
+              <td><code>docs/PHASE_3_EXECUTION_STATE.md</code></td>
+              <td><strong>Created</strong></td>
+              <td>Durable project state document capturing decisions DEC-01 through DEC-05 and execution logs.</td>
+            </tr>
+            <tr>
+              <td><code>prisma/schema.prisma</code></td>
+              <td><strong>Modified</strong></td>
+              <td>Production Prisma 7 schema expanded from 2 verification models to 20 full examination and scoring models with composite keys.</td>
+            </tr>
+            <tr>
+              <td><code>src/generated/prisma/*</code></td>
+              <td><strong>Regenerated</strong></td>
+              <td>Type-safe Prisma Client regenerated in 2.0s via <code>prisma generate</code>.</td>
+            </tr>
+            <tr>
+              <td><code>prisma/migrations/20261012000000_phase3_domain_models_and_integrity_guards/migration.sql</code></td>
+              <td><strong>Created</strong></td>
+              <td>Comprehensive PostgreSQL DDL migration: enums, tables, composite constraints, partial indexes, triggers, and stored procedures.</td>
+            </tr>
+            <tr>
+              <td><code>src/lib/scoring/engine.ts</code></td>
+              <td><strong>Created</strong></td>
+              <td>Mathematical scoring engine supporting precedence, scrambled option resolution, negative scoring, and withdrawal rules.</td>
+            </tr>
+            <tr>
+              <td><code>tests/scoring.test.mjs</code></td>
+              <td><strong>Created</strong></td>
+              <td>Automated test suite verifying clean scoring, hierarchical precedence, withdrawn questions, and negative score preservation.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Section 3 -->
+    <section id="section-3">
+      <h2>3. Durable Decision Record (DEC-01 through DEC-05)</h2>
+      <p>
+        As instructed by the Product Owner, the five foundational decisions are recorded permanently:
+      </p>
+      <ul>
+        <li><strong>DEC-01 — Booklet Variants (Option A):</strong> In Phase 1, booklet series strictly represent permutations of question sequence and option order. Identical question text and option content across all booklets. Text rewrites deferred to Phase 2.</li>
+        <li><strong>DEC-02 — Negative Scores (Option A):</strong> Student dashboards display authentic raw scores (including negative decimal values such as -4.25) where consistent with official conducting body rules (e.g. BPSC). No artificial flooring at 0.00.</li>
+        <li><strong>DEC-03 — Withdrawn Questions (Option A):</strong> The system defaults to <code>EXCLUDED_FROM_TOTAL</code> (reducing denominator and total questions), while supporting explicit configuration of <code>FULL_MARKS_AWARDED</code> per question when officially decreed.</li>
+        <li><strong>DEC-04 — Attempt Retention (Option A):</strong> Anonymized completed attempts (<code>user_id = NULL</code>) are retained for psychometric calibration; unsubmitted/abandoned <code>IN_PROGRESS</code> attempts are purged after 72 hours.</li>
+        <li><strong>DEC-05 — Fonts (Option A):</strong> Offline-safe font configuration and system fallbacks ensure 100% reproducible builds without build-time dependency on external Google font CDNs.</li>
+      </ul>
+    </section>
+
+    <!-- Section 4 -->
+    <section id="section-4">
+      <h2>4. Relational Architecture & Composite Foreign Key Strategy</h2>
+      <p>
+        To prevent cross-paper foreign key pollution at the database engine level, the relational schema uses composite foreign keys:
+      </p>
+      <pre><code>[exam_papers] (id)
+      ▲
+      │ (paper_id, id) composite foreign key
+[booklet_series] (paper_id, id)
+      ▲
+      │ (paper_id, booklet_series_id) composite foreign key
+[test_attempts] (paper_id, booklet_series_id)</code></pre>
+    </section>
+
+    <!-- Section 5 -->
+    <section id="section-5">
+      <h2>5. PostgreSQL Immutability Trigger Suite & Publication Gate</h2>
+
+      <div class="diagram-card">
+        <div class="diagram-title">Paper Lifecycle State Machine</div>
+        <div class="mermaid">
+stateDiagram-v2
+    [*] --> DRAFT: Creator initializes paper
+    DRAFT --> EDITORIAL_REVIEW: All sections and questions populated
+    EDITORIAL_REVIEW --> DRAFT: Rejection or revisions required
+    EDITORIAL_REVIEW --> VERIFIED: Content and translation certified
+    VERIFIED --> PUBLISHED: Atomic gate fn_publish_exam_paper
+    PUBLISHED --> ARCHIVED: Administrative retirement
+        </div>
+      </div>
+
+      <p>
+        The trigger function <code>fn_guard_published_content_immutability()</code> evaluates both <code>OLD</code> and <code>NEW</code> records, preventing foreign-key reparenting bypasses, and protects comprehension passages referenced by published papers.
+      </p>
+    </section>
+
+    <!-- Section 6 -->
+    <section id="section-6">
+      <h2>6. Mathematical Scoring Engine & Two-Tier Evaluation Ledger</h2>
+
+      <div class="diagram-card">
+        <div class="diagram-title">Two-Tier Evaluation Ledger Architecture</div>
+        <div class="mermaid">
+flowchart TD
+    subgraph Subgraph_Attempts ["Test Attempts"]
+        TA["test_attempts (Session Metadata)"]
+    end
+
+    subgraph Subgraph_Responses ["Immutable Responses"]
+        TA --> AR["attempt_responses (Selected IDs & Labels)"]
+    end
+
+    subgraph Subgraph_Evaluations ["Two-Tier Evaluation Ledger"]
+        TA --> EV1["attempt_evaluations v1 (Exam Day Original)"]
+        TA --> EV2["attempt_evaluations v2 (Revised Key Re-evaluation)"]
+        EV2 --> |Active| CURR["is_current_active = TRUE"]
+    end
+        </div>
+      </div>
+
+      <p>
+        The scoring engine adheres strictly to the hierarchical formula:
+        <strong>Occurrence Override &succ; Section Override &succ; Paper Baseline</strong>.
+      </p>
+    </section>
+
+    <!-- Section 7 -->
+    <section id="section-7">
+      <h2>7. Automated Verification & CI/CD Pipeline Results</h2>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Verification Check</th>
+              <th>Command</th>
+              <th>Observed Result</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Schema Validation</td>
+              <td><code>npx prisma validate</code></td>
+              <td>The schema at prisma\schema.prisma is valid</td>
+              <td><span class="badge-success">PASS</span></td>
+            </tr>
+            <tr>
+              <td>Client Generation</td>
+              <td><code>npm run db:generate</code></td>
+              <td>Generated Prisma Client (7.10.0) in 2.0s</td>
+              <td><span class="badge-success">PASS</span></td>
+            </tr>
+            <tr>
+              <td>Unit & Integration Tests</td>
+              <td><code>npm test</code></td>
+              <td>9 tests passed, 0 failed (auth, headers, scoring)</td>
+              <td><span class="badge-success">PASS</span></td>
+            </tr>
+            <tr>
+              <td>Static Typecheck</td>
+              <td><code>npm run typecheck</code></td>
+              <td>0 TypeScript errors</td>
+              <td><span class="badge-success">PASS</span></td>
+            </tr>
+            <tr>
+              <td>ESLint Code Quality</td>
+              <td><code>npm run lint</code></td>
+              <td>0 warnings, 0 errors</td>
+              <td><span class="badge-success">PASS</span></td>
+            </tr>
+            <tr>
+              <td>Production Build</td>
+              <td><code>npm run build</code></td>
+              <td>Compiled in 7.7s; 8/8 static pages generated</td>
+              <td><span class="badge-success">PASS</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Section 8 -->
+    <section id="section-8">
+      <h2>8. Database Migration Safety & Deployment Readiness</h2>
+      <p>
+        In accordance with Section 5 of the execution directive:
+      </p>
+      <ul>
+        <li>The migration file <code>20261012000000_phase3_domain_models_and_integrity_guards/migration.sql</code> is prepared, self-contained, and isolated.</li>
+        <li>No live or production database was mutated without confirmation.</li>
+        <li>When the target development/staging Supabase environment is confirmed, the migration is applied using <code>npm run db:deploy</code>.</li>
+      </ul>
+    </section>
+
+  </main>
+</body>
+</html>
