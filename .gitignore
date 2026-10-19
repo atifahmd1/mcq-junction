@@ -51,4 +51,6 @@ audit-report.json
 notes.txt
 test-results/
 scratch/
+*.test_bak
+*.bak
 

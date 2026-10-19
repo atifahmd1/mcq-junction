@@ -423,4 +423,20 @@ The Product Owner explicitly authorized Phase 3 execution and resolved foundatio
   * Strict TLS 1.3 / 1.2 certificate verification enforced with official Supabase Root 2021 CA certificate.
   * Disposable test fixtures purged cleanly after acceptance test run.
 
+---
+
+## 20. Phase 14: Vercel Hobby Cron Compatibility, Canonical Report Relocation & Release Hygiene
+
+| Component / Task | File / Path | Implementation Summary | Status |
+| :--- | :--- | :--- | :--- |
+| **Vercel Hobby Cron Incompatibility** | `vercel.json` | Replaced per-minute schedule (`* * * * *`) with daily schedule (`0 0 * * *`) to unblock Vercel Hobby deployment validation. | **RESOLVED** |
+| **Hobby Plan Cron Invariant Audit** | `src/lib/exam/service.ts` | Re-verified that cron frequency does not govern answer validity. `saveAttemptAnswer()` strictly rejects any answer post-deadline with `MCQJ-ERR-6003 (403 Forbidden)`. | **VERIFIED** |
+| **External Scheduler Specification** | `docs/deployment/STAGING_RUNBOOK.md` | Documented 5-minute autonomous sweep integration via GitHub Actions scheduled workflow / Upstash QStash calling `POST /api/cron/finalize-overdue-attempts` with `x-cron-secret`. | **DOCUMENTED** |
+| **Automated Vercel Cron Validator** | `tests/scheduler-finalization.test.mjs` | Added `SCHED-08` and `SCHED-09` testing `vercel.json` validity and strict 5-field daily Hobby cron expression compliance. All 9 tests PASS. | **9/9 PASS** |
+| **Root-Level Report File Diagnosis** | Repository Root vs `docs/reports/` | Identified 25 duplicate project reports and findings files committed to root. Established `docs/reports/` as sole canonical location. | **DIAGNOSED** |
+| **Canonical Report Relocation** | `docs/reports/` | Migrated `reports/ui-ux-redesign-report.md` to `docs/reports/ui-ux-redesign-report.md`, synchronized complete Phase 7 report, and removed 25 root duplicates via `git rm`. | **RELOCATED** |
+| **Git Hygiene & Backup Ignore** | `.gitignore` | Added `*.test_bak` and `*.bak` ignore patterns while keeping markdown reports tracked under `docs/reports/`. | **HARDENED** |
+| **Preflight Verification** | `scripts/release-preflight.mjs` | Executed preflight audit confirming 10 sequential migrations, valid schema, and Hobby-compatible cron configuration. | **PASSED** |
+
+
 

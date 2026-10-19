@@ -162,27 +162,65 @@ Examinations enforce a server-authoritative deadline (`expires_at`). Abandoned a
 
 ### Deployed Background Finalization Architecture:
 1. **Scheduled Vercel Cron (`vercel.json`):**
-   * MCQ Junction defines a 1-minute cron job in `vercel.json`:
+   * Configured with a daily cron schedule to comply with Vercel Hobby tier limitations:
      ```json
      {
+       "$schema": "https://openapi.vercel.sh/vercel.json",
        "crons": [
          {
            "path": "/api/cron/finalize-overdue-attempts",
-           "schedule": "* * * * *"
+           "schedule": "0 0 * * *"
          }
        ]
      }
      ```
-   * Vercel Cron automatically attaches `Authorization: Bearer <CRON_SECRET>` to invocations.
-2. **Alternative External Schedulers (AWS EventBridge / GitHub Actions / Supabase pg_cron):**
-   * Configured to invoke `GET` or `POST /api/cron/finalize-overdue-attempts` every 60 seconds with header `Authorization: Bearer <CRON_SECRET>` or `x-cron-secret: <CRON_SECRET>`.
-   * Endpoint returns HTTP 500 on database connection errors, allowing external schedulers to register failure and perform exponential backoff retries.
-3. **Security Boundary Enforcement:**
+   * Vercel Cron automatically attaches `Authorization: Bearer <CRON_SECRET>` to daily invocations.
+   * If the account is later upgraded to Vercel Pro, per-minute (`* * * * *`) or 5-minute (`*/5 * * * *`) schedules can be set directly in `vercel.json`.
+
+2. **Server-Authoritative Exam Timing Invariance:**
+   * The cron schedule frequency does **not** govern examination integrity or allow candidates to submit late answers.
+   * On every answer write (`saveAttemptAnswer`), the server verifies `Date.now() <= deadline`. If the authoritative deadline has passed, the write is rejected with `MCQJ-ERR-6003 (403 Forbidden)` and auto-finalized on the spot.
+   * On workspace load (`getAttemptWorkspace`), if `now >= deadline`, the server auto-submits the attempt.
+   * The database trigger `trg_attempt_responses_mutation_guard` enforces row-level immutability once an attempt is `SUBMITTED` or `EVALUATED`.
+   * The cron sweep is strictly an asynchronous garbage collector for abandoned attempts where a candidate disconnected and never returned.
+
+3. **External Scheduler Integration (for Frequent Sweeps on Hobby Tier):**
+   * To achieve frequent sweeps (e.g. every 5 minutes) while hosted on Vercel Hobby, use a secure external scheduler:
+     - **Target Endpoint:** `POST https://<staging-hostname>/api/cron/finalize-overdue-attempts` (or alias `/api/cron/finalize-overdue`)
+     - **Schedule:** `*/5 * * * *` (every 5 minutes)
+     - **Authentication:** `Authorization: Bearer <CRON_SECRET>` or `x-cron-secret: <CRON_SECRET>`
+     - **Setup with GitHub Actions Workflow (`.github/workflows/cron-sweep.yml`):**
+       ```yaml
+       name: Exam Overdue Sweeper
+       on:
+         schedule:
+           - cron: '*/5 * * * *'
+         workflow_dispatch:
+       jobs:
+         sweep:
+           runs-on: ubuntu-latest
+           steps:
+             - name: Trigger Overdue Exam Finalization
+               run: |
+                 curl -fsS -X POST "https://${{ secrets.STAGING_DOMAIN }}/api/cron/finalize-overdue-attempts" \
+                   -H "x-cron-secret: ${{ secrets.CRON_SECRET }}"
+       ```
+     - **Alternative Providers:** Upstash QStash, cron-job.org, or Supabase `pg_cron` (invoking via `pg_net`).
+     - **Verification:**
+       ```bash
+       curl -i -X POST "https://<staging-hostname>/api/cron/finalize-overdue-attempts" \
+         -H "x-cron-secret: <STAGING_CRON_SECRET>"
+       # Expected HTTP 200: { "success": true, "paperId": "ALL_PAPERS", "finalizedCount": 0, "attemptIds": [] }
+       ```
+
+4. **Security Boundary Enforcement:**
    * Unauthenticated or candidate-origin sweep requests are strictly rejected with HTTP 401 Unauthorized (`MCQJ-ERR-4001`) or HTTP 403 Forbidden (`MCQJ-ERR-4003`).
    * The server action `finalizeOverdueAttemptsAction` is gated with `assertAdminSession()`. Unprivileged candidates cannot trigger sweeps across other candidates' attempts.
-4. **Resilience & Idempotency:**
+
+5. **Resilience & Idempotency:**
    * If the scheduler is delayed or fails temporarily, the next sweep immediately identifies and atomically evaluates all expired attempts regardless of how long ago they expired (`expires_at < clock_timestamp()`).
    * Repeated executions on clean state evaluate zero attempts and produce zero duplicate scorecards or notifications.
+   * Endpoint returns HTTP 500 on database failure, enabling external schedulers to log failure and execute retry policies.
 
 ---
 

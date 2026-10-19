@@ -3,6 +3,8 @@
 // File: tests/scheduler-finalization.test.mjs
 // ============================================================================
 
+import fs from "node:fs";
+import path from "node:path";
 import test from "node:test";
 import assert from "node:assert/strict";
 import pg from "pg";
@@ -414,3 +416,46 @@ test("SCHED-07: Cron handler handles database errors with HTTP 500 to trigger sc
     process.env.CRON_SECRET = originalSecret;
   }
 });
+
+test("SCHED-08: vercel.json cron configuration is valid JSON and specifies supported endpoint", () => {
+  const vercelPath = path.resolve(process.cwd(), "vercel.json");
+  assert.ok(fs.existsSync(vercelPath), "vercel.json must exist in project root");
+
+  const config = JSON.parse(fs.readFileSync(vercelPath, "utf8"));
+  assert.ok(Array.isArray(config.crons), "vercel.json must contain crons array");
+  assert.ok(config.crons.length > 0, "crons array must not be empty");
+
+  const cronItem = config.crons.find((c) => c.path === "/api/cron/finalize-overdue-attempts");
+  assert.ok(cronItem, "vercel.json must configure /api/cron/finalize-overdue-attempts");
+  assert.ok(typeof cronItem.schedule === "string", "Cron schedule must be a string");
+});
+
+test("SCHED-09: vercel.json schedule expression strictly complies with Vercel Hobby daily execution limit", () => {
+  const vercelPath = path.resolve(process.cwd(), "vercel.json");
+  const config = JSON.parse(fs.readFileSync(vercelPath, "utf8"));
+  const cronItem = config.crons.find((c) => c.path === "/api/cron/finalize-overdue-attempts");
+  assert.ok(cronItem, "vercel.json must configure /api/cron/finalize-overdue-attempts");
+
+  const schedule = cronItem.schedule.trim();
+  const parts = schedule.split(/\s+/);
+  assert.strictEqual(parts.length, 5, `Cron expression must contain exactly 5 fields, got: '${schedule}'`);
+
+  // Vercel Hobby limits cron jobs to at most once per day.
+  // Field 0: minute (must be a specific number 0-59, not '*' or '*/n')
+  // Field 1: hour (must be a specific number 0-23, not '*' or '*/n')
+  // Field 2: day-of-month ('*')
+  // Field 3: month ('*')
+  // Field 4: day-of-week ('*')
+  const [min, hour, dom, mon, dow] = parts;
+  assert.ok(!min.includes("*"), `Hobby cron minute must be a fixed minute (0-59), got: ${min}`);
+  assert.ok(!hour.includes("*"), `Hobby cron hour must be a fixed hour (0-23), got: ${hour}`);
+  assert.strictEqual(dom, "*", `Day-of-month should be * for daily run, got: ${dom}`);
+  assert.strictEqual(mon, "*", `Month should be * for daily run, got: ${mon}`);
+  assert.strictEqual(dow, "*", `Day-of-week should be * for daily run, got: ${dow}`);
+
+  const minNum = parseInt(min, 10);
+  const hourNum = parseInt(hour, 10);
+  assert.ok(!isNaN(minNum) && minNum >= 0 && minNum <= 59, `Minute must be 0-59, got: ${minNum}`);
+  assert.ok(!isNaN(hourNum) && hourNum >= 0 && hourNum <= 23, `Hour must be 0-23, got: ${hourNum}`);
+});
+

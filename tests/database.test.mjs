@@ -362,12 +362,12 @@ test("DB-06: Relational Integrity — Reject invalid option-to-question mappings
     const f2 = await createHierarchyFixture(client);
 
     const bqm1 = (await client.query(`
-      SELECT id FROM booklet_question_mappings WHERE booklet_series_id = $1 LIMIT 1;
-    `, [f1.bookletId])).rows[0].id;
+      SELECT id FROM booklet_question_mappings WHERE booklet_series_id = $1 AND occurrence_id = $2;
+    `, [f1.bookletId, f1.occurrences[0]])).rows[0].id;
 
     const bqm2 = (await client.query(`
-      SELECT id FROM booklet_question_mappings WHERE booklet_series_id = $1 LIMIT 1;
-    `, [f2.bookletId])).rows[0].id;
+      SELECT id FROM booklet_question_mappings WHERE booklet_series_id = $1 AND occurrence_id = $2;
+    `, [f2.bookletId, f2.occurrences[0]])).rows[0].id;
 
     const opt1A = f1.optionsList[0].optA;
     const opt2A = f2.optionsList[0].optA;
